@@ -4,15 +4,17 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import moment from 'moment';
+import EventModal from './EventModal';
 import './timetable.css';
 
 const TimetableCalendar = () => {
   const [events, setEvents] = useState([]);
-  const [courses, setCourses] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
 
-  // Load saved events from database (mock for now)
+  // Load mock data
   useEffect(() => {
-    // TODO: Replace with API call
     const mockEvents = [
       {
         id: '1',
@@ -42,56 +44,105 @@ const TimetableCalendar = () => {
     setEvents(mockEvents);
   }, []);
 
-  // Handle date click (for adding new events)
+  // When user clicks empty time slot
   const handleDateClick = (info) => {
-    alert(`Would you like to add a class on ${moment(info.date).format('MMMM Do YYYY, h:mm a')}?`);
-    // TODO: Open modal for adding event
+    setSelectedEvent(null);
+    setSelectedSlot({
+      start: info.date,
+      end: new Date(info.date.getTime() + 60 * 60 * 1000) // +1 hour
+    });
+    setShowModal(true);
   };
 
-  // Handle event click (for editing)
+  // When user clicks existing event
   const handleEventClick = (info) => {
-    alert(`Edit: ${info.event.title}`);
-    // TODO: Open modal with event details
+    setSelectedEvent(info.event);
+    setSelectedSlot(null);
+    setShowModal(true);
   };
 
-  // Handle event drop (drag to move)
+  // When user drags event
   const handleEventDrop = (info) => {
-    console.log('Event moved:', info.event);
-    // TODO: Update database
+    const updatedEvents = events.map(e =>
+      e.id === info.event.id
+        ? { ...e, start: info.event.start, end: info.event.end }
+        : e
+    );
+    setEvents(updatedEvents);
   };
 
-  // Handle event resize
+  // When user resizes event
   const handleEventResize = (info) => {
-    console.log('Event resized:', info.event);
-    // TODO: Update database
+    const updatedEvents = events.map(e =>
+      e.id === info.event.id
+        ? { ...e, start: info.event.start, end: info.event.end }
+        : e
+    );
+    setEvents(updatedEvents);
+  };
+
+  // Save event from modal
+  const handleSaveEvent = (eventData) => {
+    const newEvent = {
+      id: eventData.id || Date.now().toString(),
+      title: eventData.title,
+      start: eventData.start,
+      end: eventData.end,
+      backgroundColor: eventData.backgroundColor,
+      borderColor: eventData.backgroundColor,
+      extendedProps: {
+        courseCode: eventData.courseCode,
+        location: eventData.location
+      }
+    };
+
+    if (selectedEvent) {
+      // Update existing
+      setEvents(events.map(e => e.id === newEvent.id ? newEvent : e));
+    } else {
+      // Add new
+      setEvents([...events, newEvent]);
+    }
+
+    setShowModal(false);
   };
 
   return (
-    <div className="timetable-container">
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        }}
-        initialView="timeGridWeek"
-        editable={true}
-        selectable={true}
-        selectMirror={true}
-        dayMaxEvents={true}
-        weekends={true}
-        events={events}
-        dateClick={handleDateClick}
-        eventClick={handleEventClick}
-        eventDrop={handleEventDrop}
-        eventResize={handleEventResize}
-        slotMinTime="08:00:00"
-        slotMaxTime="22:00:00"
-        allDaySlot={false}
-        height="auto"
+    <>
+      <div className="timetable-container">
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          }}
+          initialView="timeGridWeek"
+          editable={true}
+          selectable={true}
+          selectMirror={true}
+          dayMaxEvents={true}
+          weekends={true}
+          events={events}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          eventDrop={handleEventDrop}
+          eventResize={handleEventResize}
+          slotMinTime="08:00:00"
+          slotMaxTime="22:00:00"
+          allDaySlot={false}
+          height="auto"
+        />
+      </div>
+
+      <EventModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        onSave={handleSaveEvent}
+        eventData={selectedEvent}
+        selectedSlot={selectedSlot}
       />
-    </div>
+    </>
   );
 };
 
