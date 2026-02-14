@@ -3,7 +3,6 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import moment from 'moment';
 import EventModal from './EventModal';
 import './timetable.css';
 
@@ -13,7 +12,6 @@ const TimetableCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
 
-  // Load mock data
   useEffect(() => {
     const mockEvents = [
       {
@@ -27,62 +25,86 @@ const TimetableCalendar = () => {
           courseCode: 'IT3040',
           location: 'Room 3.02'
         }
-      },
-      {
-        id: '2',
-        title: 'IT3050 - Tutorial',
-        start: '2026-02-18T14:00:00',
-        end: '2026-02-18T15:30:00',
-        backgroundColor: '#41b883',
-        borderColor: '#41b883',
-        extendedProps: {
-          courseCode: 'IT3050',
-          location: 'Lab 2.01'
-        }
       }
     ];
     setEvents(mockEvents);
   }, []);
 
-  // When user clicks empty time slot
+  // ✅ Conflict Detection Business Rule
+  const checkForConflicts = (newStart, newEnd, excludeId = null) => {
+    return events.some(event => {
+      if (excludeId && event.id === excludeId) return false;
+
+      const eventStart = new Date(event.start);
+      const eventEnd = new Date(event.end);
+      const start = new Date(newStart);
+      const end = new Date(newEnd);
+
+      return (start < eventEnd && end > eventStart);
+    });
+  };
+
   const handleDateClick = (info) => {
     setSelectedEvent(null);
     setSelectedSlot({
       start: info.date,
-      end: new Date(info.date.getTime() + 60 * 60 * 1000) // +1 hour
+      end: new Date(info.date.getTime() + 60 * 60 * 1000)
     });
     setShowModal(true);
   };
 
-  // When user clicks existing event
   const handleEventClick = (info) => {
     setSelectedEvent(info.event);
     setSelectedSlot(null);
     setShowModal(true);
   };
 
-  // When user drags event
   const handleEventDrop = (info) => {
+    if (checkForConflicts(info.event.start, info.event.end, info.event.id)) {
+      alert("Time conflict detected!");
+      info.revert();
+      return;
+    }
+
     const updatedEvents = events.map(e =>
       e.id === info.event.id
         ? { ...e, start: info.event.start, end: info.event.end }
         : e
     );
+
     setEvents(updatedEvents);
   };
 
-  // When user resizes event
   const handleEventResize = (info) => {
+    if (checkForConflicts(info.event.start, info.event.end, info.event.id)) {
+      alert("Time conflict detected!");
+      info.revert();
+      return;
+    }
+
     const updatedEvents = events.map(e =>
       e.id === info.event.id
         ? { ...e, start: info.event.start, end: info.event.end }
         : e
     );
+
     setEvents(updatedEvents);
   };
 
-  // Save event from modal
   const handleSaveEvent = (eventData) => {
+
+    // ✅ Business Rule: No past scheduling
+    if (new Date(eventData.start) < new Date()) {
+      alert("Cannot schedule classes in the past!");
+      return;
+    }
+
+    // ✅ Business Rule: No overlapping classes
+    if (checkForConflicts(eventData.start, eventData.end, eventData.id)) {
+      alert("This time slot conflicts with an existing class!");
+      return;
+    }
+
     const newEvent = {
       id: eventData.id || Date.now().toString(),
       title: eventData.title,
@@ -97,10 +119,8 @@ const TimetableCalendar = () => {
     };
 
     if (selectedEvent) {
-      // Update existing
       setEvents(events.map(e => e.id === newEvent.id ? newEvent : e));
     } else {
-      // Add new
       setEvents([...events, newEvent]);
     }
 
@@ -112,17 +132,9 @@ const TimetableCalendar = () => {
       <div className="timetable-container">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          }}
           initialView="timeGridWeek"
           editable={true}
           selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          weekends={true}
           events={events}
           dateClick={handleDateClick}
           eventClick={handleEventClick}
