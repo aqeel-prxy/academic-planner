@@ -4,6 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import EventModal from './EventModal';
+import api from '../../services/api';   // ✅ ADDED
 import './timetable.css';
 
 const TimetableCalendar = () => {
@@ -12,22 +13,18 @@ const TimetableCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
 
+  // ✅ Load events from database
   useEffect(() => {
-    const mockEvents = [
-      {
-        id: '1',
-        title: 'IT3040 - Lecture',
-        start: '2026-02-17T09:00:00',
-        end: '2026-02-17T11:00:00',
-        backgroundColor: '#3788d8',
-        borderColor: '#3788d8',
-        extendedProps: {
-          courseCode: 'IT3040',
-          location: 'Room 3.02'
-        }
+    const loadEvents = async () => {
+      try {
+        const data = await api.getEvents();
+        setEvents(data);
+      } catch (error) {
+        console.error('Failed to load events:', error);
       }
-    ];
-    setEvents(mockEvents);
+    };
+
+    loadEvents();
   }, []);
 
   // ✅ Conflict Detection Business Rule
@@ -59,72 +56,74 @@ const TimetableCalendar = () => {
     setShowModal(true);
   };
 
-  const handleEventDrop = (info) => {
+  // ✅ Drag & Drop Update (Backend Integrated)
+  const handleEventDrop = async (info) => {
     if (checkForConflicts(info.event.start, info.event.end, info.event.id)) {
       alert("Time conflict detected!");
       info.revert();
       return;
     }
 
-    const updatedEvents = events.map(e =>
-      e.id === info.event.id
-        ? { ...e, start: info.event.start, end: info.event.end }
-        : e
-    );
-
-    setEvents(updatedEvents);
+    try {
+      await api.updateEvent(info.event.id, {
+        start: info.event.start,
+        end: info.event.end
+      });
+    } catch (error) {
+      console.error("Update failed:", error);
+      info.revert();
+    }
   };
 
-  const handleEventResize = (info) => {
+  // ✅ Resize Update (Backend Integrated)
+  const handleEventResize = async (info) => {
     if (checkForConflicts(info.event.start, info.event.end, info.event.id)) {
       alert("Time conflict detected!");
       info.revert();
       return;
     }
 
-    const updatedEvents = events.map(e =>
-      e.id === info.event.id
-        ? { ...e, start: info.event.start, end: info.event.end }
-        : e
-    );
-
-    setEvents(updatedEvents);
+    try {
+      await api.updateEvent(info.event.id, {
+        start: info.event.start,
+        end: info.event.end
+      });
+    } catch (error) {
+      console.error("Resize failed:", error);
+      info.revert();
+    }
   };
 
-  const handleSaveEvent = (eventData) => {
+  // ✅ Updated handleSaveEvent (Backend Connected)
+  const handleSaveEvent = async (eventData) => {
 
-    // ✅ Business Rule: No past scheduling
+    // ❌ No past scheduling
     if (new Date(eventData.start) < new Date()) {
       alert("Cannot schedule classes in the past!");
       return;
     }
 
-    // ✅ Business Rule: No overlapping classes
+    // ❌ No overlapping classes
     if (checkForConflicts(eventData.start, eventData.end, eventData.id)) {
       alert("This time slot conflicts with an existing class!");
       return;
     }
 
-    const newEvent = {
-      id: eventData.id || Date.now().toString(),
-      title: eventData.title,
-      start: eventData.start,
-      end: eventData.end,
-      backgroundColor: eventData.backgroundColor,
-      borderColor: eventData.backgroundColor,
-      extendedProps: {
-        courseCode: eventData.courseCode,
-        location: eventData.location
+    try {
+      if (selectedEvent) {
+        const updated = await api.updateEvent(selectedEvent.id, eventData);
+        setEvents(events.map(e => e.id === updated.id ? updated : e));
+      } else {
+        const created = await api.createEvent(eventData);
+        setEvents([...events, created]);
       }
-    };
 
-    if (selectedEvent) {
-      setEvents(events.map(e => e.id === newEvent.id ? newEvent : e));
-    } else {
-      setEvents([...events, newEvent]);
+      setShowModal(false);
+
+    } catch (error) {
+      console.error('Failed to save event:', error);
+      alert('Error saving event. Please try again.');
     }
-
-    setShowModal(false);
   };
 
   return (
