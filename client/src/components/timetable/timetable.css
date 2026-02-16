@@ -1,0 +1,38 @@
+.timetable-container {
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* Customize calendar appearance */
+  .fc {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  .fc-toolbar-title {
+    font-size: 1.5em !important;
+    font-weight: 600 !important;
+  }
+  
+  .fc-event {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+  }
+  
+  .fc-event:hover {
+    opacity: 0.9;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  
+  /* Week view time slots */
+  .fc-timegrid-slot {
+    height: 2.5em !important;
+  }
+  
+  /* Current time indicator */
+  .fc-timegrid-now-indicator-line {
+    border-color: #e74c3c !important;
+    border-width: 2px !important;
+  }
