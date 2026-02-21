@@ -1,0 +1,16 @@
+{
+  "name": "academic-planner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Academic Planner - full stack app",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "server": "npm run dev --prefix server",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently --names \"server,client\" --prefix-colors \"blue,green\" \"npm run server\" \"npm run client\"",
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
