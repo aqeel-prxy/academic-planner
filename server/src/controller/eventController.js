@@ -61,9 +61,10 @@ const createEvent = async (req, res) => {
       });
     }
 
+    const { id: bodyId, ...data } = req.body;
     const event = await Event.create({
-      id: Date.now().toString(),
-      ...req.body
+      id: (bodyId && bodyId !== 'null') ? bodyId : Date.now().toString(),
+      ...data
     });
     res.status(201).json(event);
   } catch (error) {

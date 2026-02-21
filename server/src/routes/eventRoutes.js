@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const eventController = require('../controllers/eventController');
-const { validateEvent } = require('../middleware/validation');
+const eventController = require('../controller/eventController');
+const { validateEvent, validateEventUpdate } = require('../middleware/validation');
 
 // GET all events
 router.get('/', eventController.getAllEvents);
@@ -12,8 +12,8 @@ router.get('/:id', eventController.getEventById);
 // POST create new event
 router.post('/', validateEvent, eventController.createEvent);
 
-// PUT update event
-router.put('/:id', validateEvent, eventController.updateEvent);
+// PUT update event (partial updates allowed for drag/resize)
+router.put('/:id', validateEventUpdate, eventController.updateEvent);
 
 // DELETE event
 router.delete('/:id', eventController.deleteEvent);

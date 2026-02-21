@@ -13,12 +13,21 @@ const TimetableCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
 
+  // Map API event to FullCalendar shape (extendedProps for modal)
+  const toCalendarEvent = (e) => ({
+    ...e,
+    extendedProps: {
+      courseCode: e.courseCode,
+      location: e.location
+    }
+  });
+
   // ✅ Load events from database
   useEffect(() => {
     const loadEvents = async () => {
       try {
         const data = await api.getEvents();
-        setEvents(data);
+        setEvents(data.map(toCalendarEvent));
       } catch (error) {
         console.error('Failed to load events:', error);
       }
@@ -94,6 +103,20 @@ const TimetableCalendar = () => {
     }
   };
 
+  // Normalize datetime-local "YYYY-MM-DDTHH:mm" to ISO with seconds for backend
+  const normalizePayload = (data) => {
+    const toIso = (v) => {
+      if (!v) return v;
+      if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return v + ':00';
+      return v;
+    };
+    const payload = { ...data };
+    if (payload.start) payload.start = toIso(payload.start);
+    if (payload.end) payload.end = toIso(payload.end);
+    if (payload.backgroundColor && !payload.borderColor) payload.borderColor = payload.backgroundColor;
+    return payload;
+  };
+
   // ✅ Updated handleSaveEvent (Backend Connected)
   const handleSaveEvent = async (eventData) => {
 
@@ -109,20 +132,25 @@ const TimetableCalendar = () => {
       return;
     }
 
+    const payload = normalizePayload(eventData);
+
     try {
       if (selectedEvent) {
-        const updated = await api.updateEvent(selectedEvent.id, eventData);
-        setEvents(events.map(e => e.id === updated.id ? updated : e));
+        const updated = await api.updateEvent(selectedEvent.id, payload);
+        setEvents(prev => prev.map(e => e.id === updated.id ? toCalendarEvent(updated) : e));
       } else {
-        const created = await api.createEvent(eventData);
-        setEvents([...events, created]);
+        const created = await api.createEvent(payload);
+        setEvents(prev => [...prev, toCalendarEvent(created)]);
       }
 
       setShowModal(false);
 
     } catch (error) {
       console.error('Failed to save event:', error);
-      alert('Error saving event. Please try again.');
+      const msg = error.response?.data?.errors
+        ? error.response.data.errors.map(e => e.msg).join(', ')
+        : error.response?.data?.error || error.message || 'Please try again.';
+      alert('Error saving event: ' + msg);
     }
   };
 
