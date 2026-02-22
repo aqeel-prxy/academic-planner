@@ -1,38 +1,417 @@
+/* ========== Timetable toolbar ========== */
+.timetable-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.timetable-toolbar-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.timetable-select {
+  padding: 0.55rem 2.25rem 0.55rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  cursor: pointer;
+  min-width: 180px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.timetable-select:hover {
+  border-color: #94a3b8;
+}
+
+.timetable-select:focus {
+  outline: none;
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
+}
+
+.timetable-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  border: 1px solid transparent;
+}
+
+.timetable-btn-rename {
+  color: #475569;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.timetable-btn-rename:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.timetable-btn-new {
+  color: #1e40af;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.timetable-btn-new:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* ========== Scrollable week – large slots (60px each), scroll to see all ========== */
+.timetable-scrollable-week {
+  --slot-height: 60px;
+  --slot-count: 28; /* 8am–10pm, 30-min slots */
+}
+
+/* Fixed total height so scrolling works; each slot is 56px for a large, friendly grid */
+.timetable-scrollable-week .fc-timegrid-slots {
+  height: calc(var(--slot-count) * var(--slot-height)) !important;
+}
+
+.timetable-scrollable-week .fc-timegrid-slot {
+  height: var(--slot-height) !important;
+  min-height: var(--slot-height) !important;
+}
+
+/* Enable vertical scroll so users can see all time slots */
+.timetable-scrollable-week .fc-scroller-liquid-absolute,
+.timetable-scrollable-week .fc-timegrid-body {
+  overflow: visible !important;
+}
+
+.timetable-scrollable-week .fc-scroller {
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+/* Ensure the scrollable area has a max height so the page doesn't grow infinitely */
+.timetable-scrollable-week .fc-timegrid-body {
+  min-height: min-content;
+}
+  -webkit-overflow-scrolling: touch;
+}
+
+
+/* ========== Container – scrollable timetable area ========== */
 .timetable-container {
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1rem;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 32px -8px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e2e8f0;
+  overflow: visible;
+  min-height: 400px;
+}
+
+/* ========== FullCalendar – modern base ========== */
+.fc {
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --fc-border-color: #e2e8f0;
+  --fc-button-bg-color: #1e40af;
+  --fc-button-border-color: #1e40af;
+  --fc-today-bg-color: rgba(30, 64, 175, 0.08);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: #f8fafc;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.02em;
+}
+
+/* ========== Day headers – Mon to Sun, large and clear ========== */
+.fc-theme-standard .fc-col-header-cell {
+  background: #f8fafc !important;
+  padding: 1rem 0.5rem !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  color: #475569 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-color: #e2e8f0 !important;
+}
+
+/* Today column – strong highlight */
+.fc-theme-standard .fc-col-header-cell.fc-day-today {
+  background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  color: #1e40af !important;
+}
+
+.fc .fc-timegrid-col.fc-day-today {
+  background: linear-gradient(180deg, rgba(219, 234, 254, 0.5) 0%, rgba(191, 219, 254, 0.25) 100%) !important;
+}
+
+.fc .fc-timegrid-col.fc-day-today .fc-timegrid-slot {
+  border-left: 2px solid #93c5fd !important;
+}
+
+/* ========== Time column – wide and clear ========== */
+.fc-timegrid-axis {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  width: 64px !important;
+}
+
+.fc-timegrid-slot-label {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  border-color: #e2e8f0 !important;
+  padding: 0 0.5rem !important;
+}
+
+.fc-timegrid-slot-label-cushion {
+  padding: 4px 0;
+}
+
+/* Hourly labels only (8, 9, 10...) – half-hour rows stay clickable but show no label */
+.fc-timegrid-slot-label-empty {
+  font-size: 0 !important;
+  line-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Large, user-friendly slots – easy to click and read */
+.fc-timegrid-slot {
+  border-color: #e2e8f0 !important;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.fc-timegrid-slot:hover {
+  background: rgba(241, 245, 249, 0.9) !important;
+}
+
+/* Alternate row tint for readability */
+.fc-timegrid-slot:nth-of-type(even) {
+  background: rgba(248, 250, 252, 0.6) !important;
+}
+
+.fc-timegrid-slot:nth-of-type(even):hover {
+  background: rgba(241, 245, 249, 0.95) !important;
+}
+
+/* ========== Day cells ========== */
+.fc-timegrid-col {
+  border-color: #e2e8f0 !important;
+}
+
+/* ========== Events – class cards scale with slot size (all details always visible) ========== */
+.fc-event {
+  container-type: size;
+  container-name: event-card;
+  cursor: pointer;
+  border-radius: 12px !important;
+  padding: 6px 8px !important;
+  border: none !important;
+  font-weight: 500 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 0;
+  border-left: 4px solid rgba(255, 255, 255, 0.5) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.fc-event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18), 0 1px 0 rgba(255, 255, 255, 0.15) inset;
+}
+
+.fc-event.fc-event-dragging,
+.fc-event.fc-event-resizing {
+  transition: none;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.fc-event .fc-event-main {
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.fc-event-main-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+  min-height: 100%;
+  padding: 0.15em 0;
+  justify-content: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Base scale: small slots – all details visible; scales up with slot height */
+.fc-event-main-wrap {
+  font-size: 7px;
+  line-height: 1.2;
+}
+
+@container event-card (min-height: 50px) {
+  .fc-event-main-wrap {
+    font-size: 6px;
+    gap: 0.15em;
+    padding: 0.2em 0;
   }
-  
-  /* Customize calendar appearance */
-  .fc {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@container event-card (min-height: 70px) {
+  .fc-event-main-wrap {
+    font-size: 8px;
+    gap: 0.2em;
+    padding: 0.25em 0;
   }
-  
-  .fc-toolbar-title {
-    font-size: 1.5em !important;
-    font-weight: 600 !important;
+}
+
+@container event-card (min-height: 100px) {
+  .fc-event-main-wrap {
+    font-size: 10px;
+    gap: 0.25em;
+    padding: 0.3em 0;
   }
-  
-  .fc-event {
-    cursor: pointer;
-    border-radius: 4px;
-    padding: 2px 4px;
+}
+
+@container event-card (min-height: 140px) {
+  .fc-event-main-wrap {
+    font-size: 12px;
+    gap: 0.35em;
+    padding: 0.4em 0;
   }
-  
-  .fc-event:hover {
-    opacity: 0.9;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+@container event-card (min-height: 180px) {
+  .fc-event-main-wrap {
+    font-size: 14px;
+    gap: 0.4em;
+    padding: 0.5em 0;
   }
-  
-  /* Week view time slots */
-  .fc-timegrid-slot {
-    height: 2.5em !important;
+}
+
+@container event-card (min-height: 220px) {
+  .fc-event-main-wrap {
+    font-size: 16px;
+    gap: 0.45em;
+    padding: 0.5em 0;
   }
-  
-  /* Current time indicator */
-  .fc-timegrid-now-indicator-line {
-    border-color: #e74c3c !important;
-    border-width: 2px !important;
+}
+
+.fc-event-time {
+  font-size: 0.9em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.fc-event-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.fc-event-code {
+  font-size: 0.95em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.fc-event-location {
+  font-size: 1em;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========== Current time line ========== */
+.fc-timegrid-now-indicator-line {
+  border-color: #dc2626 !important;
+  border-width: 2px !important;
+  opacity: 0.9;
+}
+
+.fc-timegrid-now-indicator-arrow {
+  border-color: #dc2626 !important;
+}
+
+.fc-scroller {
+  border-radius: 0 0 12px 12px;
+}
+
+/* Smooth scrollbar styling (where supported) */
+.timetable-scrollable-week .fc-scroller {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.timetable-scrollable-week .fc-scroller::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.timetable-scrollable-week .fc-scroller::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 5px;
+}
+
+.timetable-scrollable-week .fc-scroller::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 5px;
+}
+
+.timetable-scrollable-week .fc-scroller::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.fc-scroller-liquid-absolute {
+  border-color: #e2e8f0 !important;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .timetable-container {
+    padding: 1rem;
+    border-radius: 12px;
   }
+  .fc .fc-toolbar-title {
+    font-size: 1.1rem !important;
+  }
+  .timetable-toolbar {
+    gap: 0.5rem;
+  }
+  .timetable-btn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+  }
+}

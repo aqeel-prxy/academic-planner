@@ -1,0 +1,2 @@
+echo "*.sqlite" >> .gitignore
+echo "*.sqlite-journal" >> .gitignore
