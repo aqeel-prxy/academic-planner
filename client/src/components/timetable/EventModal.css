@@ -1,0 +1,239 @@
+/* Modern Add/Edit Class modal */
+.event-modal-modern .modal-dialog {
+  max-width: 560px;
+}
+
+.event-modal-modern .modal-content {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(30, 58, 95, 0.18), 0 8px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.event-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+  color: #fff;
+}
+
+.event-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.event-modal-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.75rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.event-modal-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.event-modal-body {
+  padding: 1.5rem 1.5rem;
+  background: #fafbfc;
+}
+
+/* Lecture details – large, elegant summary */
+.event-detail-summary {
+  margin-bottom: 1.5rem;
+}
+
+.event-detail-summary-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.event-detail-summary-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.event-detail-row {
+  margin-bottom: 0.75rem;
+}
+
+.event-detail-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.event-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.5rem;
+}
+
+.event-detail-item-full {
+  grid-column: 1 / -1;
+}
+
+.event-detail-item-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.event-detail-item-value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.event-form-section {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.event-form-section:last-child {
+  margin-bottom: 0;
+}
+
+.event-form-section-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+.event-form-control {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+.event-form-control:focus {
+  border-color: #2d5a87;
+  box-shadow: 0 0 0 3px rgba(45, 90, 135, 0.15);
+}
+
+.event-time-input {
+  min-height: 44px;
+}
+
+/* Quick duration presets for smooth time-slot changes */
+.event-duration-presets {
+  margin-bottom: 1rem;
+}
+
+.event-duration-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.event-duration-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.event-duration-btn {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.event-duration-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.event-color-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.event-form-color {
+  width: 48px;
+  height: 38px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+}
+
+.event-color-value {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-family: ui-monospace, monospace;
+}
+
+.event-modal-footer {
+  padding: 1rem 1.5rem;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  gap: 0.75rem;
+}
+
+.event-btn {
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.event-btn-cancel {
+  border-width: 1.5px;
+}
+
+.event-btn-save {
+  background: linear-gradient(135deg, #2d5a87 0%, #1e3a5f 100%);
+  border: none;
+}
+
+.event-btn-save:hover {
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+  border: none;
+}
+
+.event-btn-save:disabled {
+  opacity: 0.7;
+}

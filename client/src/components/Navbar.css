@@ -1,0 +1,120 @@
+/* === Main Navbar === */
+.app-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* === Container === */
+.navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.9rem 1.8rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* === Brand === */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  text-decoration: none;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+  opacity: 0.85;
+}
+
+.navbar-logo-icon {
+  font-size: 1.4rem;
+  color: #3b82f6;
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover .navbar-logo-icon {
+  transform: rotate(10deg) scale(1.1);
+}
+
+.navbar-logo-text {
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* === Links === */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+/* Force white – override Bootstrap or any global link color */
+.app-navbar .navbar-links a.nav-link,
+.app-navbar .nav-link,
+.app-navbar a.nav-link {
+  position: relative;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #ffffff !important;
+  padding: 0.4rem 0;
+  transition: all 0.3s ease;
+}
+
+.app-navbar .nav-link:hover,
+.app-navbar .navbar-links a.nav-link:hover {
+  color: #ffffff !important;
+}
+
+/* Animated Underline */
+.app-navbar .nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  transition: width 0.3s ease;
+}
+
+.app-navbar .nav-link:hover::after {
+  width: 100%;
+}
+
+.app-navbar .nav-link.active {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.app-navbar .nav-link.active::after {
+  width: 100%;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .navbar-inner {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .navbar-links {
+    gap: 1rem;
+  }
+}
