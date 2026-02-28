@@ -1,2 +1,4 @@
 echo "*.sqlite" >> .gitignore
 echo "*.sqlite-journal" >> .gitignore
+node_modules/ >> .gitignore
+dist/ >> .gitignore
