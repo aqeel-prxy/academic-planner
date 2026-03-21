@@ -1,20 +1,26 @@
 import React from 'react';
-import TimetableCalendar from './components/timetable/TimetableCalendar';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import AssignmentDashboard from './pages/AssignmentDashboard';
+import VisualTimetable from './pages/VisualTimetable';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import './components/Navbar.css';
 
 function App() {
   return (
-    <div className="App">
-      <nav className="navbar navbar-dark bg-primary">
-        <div className="container">
-          <span className="navbar-brand mb-0 h1">Academic Planner</span>
-        </div>
-      </nav>
-      <div className="container mt-4">
-        <TimetableCalendar />
+    <BrowserRouter>
+      <div className="App">
+        <Navbar />
+        <main className="App-main">
+          <Routes>
+            <Route path="/" element={<Navigate to="/timetable" replace />} />
+            <Route path="/assignments" element={<AssignmentDashboard />} />
+            <Route path="/timetable" element={<VisualTimetable />} />
+          </Routes>
+        </main>
       </div>
-    </div>
+    </BrowserRouter>
   );
 }
 
