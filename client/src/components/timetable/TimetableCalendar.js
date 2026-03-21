@@ -4,16 +4,50 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import EventModal from './EventModal';
-import api from '../../services/api';   // ✅ ADDED
+import api from '../../services/api';
 import './timetable.css';
+
+// Monday of the week containing date (fixed week for split students)
+const getStartOfWeek = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const slugify = (name) => name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+const TIMETABLE_NAMES_KEY = 'academicPlanner_timetableNames';
+
+const getStoredTimetableNames = () => {
+  try {
+    const raw = localStorage.getItem(TIMETABLE_NAMES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const setStoredTimetableName = (key, name) => {
+  const names = getStoredTimetableNames();
+  names[key] = name;
+  localStorage.setItem(TIMETABLE_NAMES_KEY, JSON.stringify(names));
+};
 
 const TimetableCalendar = () => {
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [currentTimetableKey, setCurrentTimetableKey] = useState('default');
+  const [timetableList, setTimetableList] = useState([]);
+  const [userCreatedTimetables, setUserCreatedTimetables] = useState([]);
+  const [customNames, setCustomNames] = useState(getStoredTimetableNames);
 
-  // Map API event to FullCalendar shape (extendedProps for modal)
+  const weekStart = getStartOfWeek(new Date());
+
   const toCalendarEvent = (e) => ({
     ...e,
     extendedProps: {
@@ -22,19 +56,47 @@ const TimetableCalendar = () => {
     }
   });
 
-  // ✅ Load events from database
+  const displayName = (key, fallbackName) => customNames[key] || fallbackName || key;
+
+  const allTimetables = () => {
+    const byKey = {};
+    [...timetableList, ...userCreatedTimetables].forEach(t => {
+      byKey[t.key] = displayName(t.key, t.name);
+    });
+    return Object.entries(byKey).map(([key, name]) => ({ key, name }));
+  };
+
+  useEffect(() => {
+    setCustomNames(getStoredTimetableNames());
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const list = await api.getTimetables();
+        setTimetableList(list.length > 0 ? list : [{ key: 'default', name: 'My Week' }]);
+        if (list.length > 0 && !list.find(t => t.key === currentTimetableKey) && !userCreatedTimetables.find(t => t.key === currentTimetableKey)) {
+          setCurrentTimetableKey(list[0].key);
+        }
+      } catch (err) {
+        console.error('Failed to load timetables:', err);
+        setTimetableList([{ key: 'default', name: 'My Week' }]);
+      }
+    };
+    load();
+  }, []);
+
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const data = await api.getEvents();
+        const data = await api.getEvents(currentTimetableKey);
         setEvents(data.map(toCalendarEvent));
       } catch (error) {
         console.error('Failed to load events:', error);
       }
     };
-
     loadEvents();
-  }, []);
+  }, [currentTimetableKey]);
 
   // ✅ Conflict Detection Business Rule
   const checkForConflicts = (newStart, newEnd, excludeId = null) => {
@@ -52,11 +114,37 @@ const TimetableCalendar = () => {
 
   const handleDateClick = (info) => {
     setSelectedEvent(null);
+    // 30-min default slot so you can add 9–9:30 and 9:30–10 separately
+    const slotMinutes = 30;
     setSelectedSlot({
       start: info.date,
-      end: new Date(info.date.getTime() + 60 * 60 * 1000)
+      end: new Date(info.date.getTime() + slotMinutes * 60 * 1000)
     });
     setShowModal(true);
+  };
+
+  const formatTime = (date) => {
+    const d = new Date(date);
+    const h = d.getHours();
+    const m = d.getMinutes();
+    return m === 0 ? `${h}` : `${h}:${String(m).padStart(2, '0')}`;
+  };
+
+  const formatTimeRange = (start, end) => `${formatTime(start)} – ${formatTime(end)}`;
+
+  // Event content: time, title, course code, location – spacious and readable
+  const renderEventContent = (arg) => {
+    const loc = arg.event.extendedProps?.location || arg.event.location || '';
+    const code = arg.event.extendedProps?.courseCode || arg.event.courseCode || '';
+    const timeStr = formatTimeRange(arg.event.start, arg.event.end);
+    return (
+      <div className="fc-event-main-wrap">
+        <div className="fc-event-time">{timeStr}</div>
+        <div className="fc-event-title">{arg.event.title}</div>
+        {code && <div className="fc-event-code">{code}</div>}
+        {loc && <div className="fc-event-location">{loc}</div>}
+      </div>
+    );
   };
 
   const handleEventClick = (info) => {
@@ -117,22 +205,15 @@ const TimetableCalendar = () => {
     return payload;
   };
 
-  // ✅ Updated handleSaveEvent (Backend Connected)
+  // Save event – template week: any day/time allowed (no past block)
   const handleSaveEvent = async (eventData) => {
-
-    // ❌ No past scheduling
-    if (new Date(eventData.start) < new Date()) {
-      alert("Cannot schedule classes in the past!");
-      return;
-    }
-
-    // ❌ No overlapping classes
     if (checkForConflicts(eventData.start, eventData.end, eventData.id)) {
       alert("This time slot conflicts with an existing class!");
       return;
     }
 
     const payload = normalizePayload(eventData);
+    payload.timetableKey = currentTimetableKey;
 
     try {
       if (selectedEvent) {
@@ -154,12 +235,57 @@ const TimetableCalendar = () => {
     }
   };
 
+  const handleNewTimetable = () => {
+    const name = window.prompt('Name this timetable (e.g. Weekend 5.2, Batch 5.1):');
+    if (!name || !name.trim()) return;
+    const key = slugify(name) || 'timetable-' + Date.now();
+    const trimmed = name.trim();
+    setUserCreatedTimetables(prev => [...prev, { key, name: trimmed }]);
+    setStoredTimetableName(key, trimmed);
+    setCustomNames(prev => ({ ...prev, [key]: trimmed }));
+    setCurrentTimetableKey(key);
+  };
+
+  const handleRenameTimetable = () => {
+    const list = allTimetables();
+    const current = list.find(t => t.key === currentTimetableKey);
+    const currentName = current ? current.name : currentTimetableKey;
+    const name = window.prompt('Rename this timetable:', currentName);
+    if (!name || !name.trim()) return;
+    setStoredTimetableName(currentTimetableKey, name.trim());
+    setCustomNames(prev => ({ ...prev, [currentTimetableKey]: name.trim() }));
+    setUserCreatedTimetables(prev => prev.map(t => t.key === currentTimetableKey ? { ...t, name: name.trim() } : t));
+    setTimetableList(prev => prev.map(t => t.key === currentTimetableKey ? { ...t, name: name.trim() } : t));
+  };
+
   return (
     <>
-      <div className="timetable-container">
+      <div className="timetable-toolbar">
+        <div className="timetable-toolbar-label">Timetable</div>
+        <select
+          className="timetable-select"
+          value={currentTimetableKey}
+          onChange={(e) => setCurrentTimetableKey(e.target.value)}
+          aria-label="Select timetable"
+        >
+          {allTimetables().map(t => (
+            <option key={t.key} value={t.key}>{t.name}</option>
+          ))}
+        </select>
+        <button type="button" className="timetable-btn timetable-btn-rename" onClick={handleRenameTimetable} title="Rename this timetable">
+          Rename
+        </button>
+        <button type="button" className="timetable-btn timetable-btn-new" onClick={handleNewTimetable}>
+          + New timetable
+        </button>
+      </div>
+      <div className="timetable-container timetable-scrollable-week">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
+          initialDate={weekStart}
+          firstDay={1}
+          dayHeaderFormat={{ weekday: 'short' }}
           editable={true}
           selectable={true}
           events={events}
@@ -167,10 +293,15 @@ const TimetableCalendar = () => {
           eventClick={handleEventClick}
           eventDrop={handleEventDrop}
           eventResize={handleEventResize}
+          eventContent={renderEventContent}
+          headerToolbar={{ left: '', center: 'title', right: '' }}
           slotMinTime="08:00:00"
           slotMaxTime="22:00:00"
+          slotDuration="00:30:00"
+          slotLabelInterval="01:00:00"
           allDaySlot={false}
-          height="auto"
+          height="calc(100vh - 200px)"
+          contentHeight="auto"
         />
       </div>
 
