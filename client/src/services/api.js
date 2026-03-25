@@ -29,12 +29,17 @@ const api = {
   // Exam Preparation
   getExamPreparations: async () => {
     const response = await axios.get(EXAM_PREP_BASE);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 
   getUpcomingExams: async () => {
     const response = await axios.get(`${EXAM_PREP_BASE}/upcoming`);
-    return response.data;
+    return response.data?.data ?? response.data;
+  },
+
+  getExamPreparationById: async (id) => {
+    const response = await axios.get(`${EXAM_PREP_BASE}/${id}`);
+    return response.data?.data ?? response.data;
   },
 
   createExamPreparation: async (payload) => {

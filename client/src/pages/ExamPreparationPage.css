@@ -30,8 +30,9 @@
 
 .exam-prep-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 520px) 1fr;
+  grid-template-columns: minmax(320px, 820px);
   gap: 1rem;
+  justify-content: center;
 }
 
 .exam-card {
@@ -48,6 +49,12 @@
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 0.85rem;
+}
+
+.exam-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .exam-card-title h2 {
@@ -81,6 +88,30 @@
   font-size: 0.9rem;
   outline: none;
   background: #ffffff;
+}
+
+.progress-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.progress-radio-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #c9dbef;
+  border-radius: 999px;
+  background: #ffffff;
+  font-weight: 900;
+  color: #1e3a5f;
+  cursor: pointer;
+  user-select: none;
+}
+
+.progress-radio-item input {
+  margin: 0;
 }
 
 .exam-form input:focus,
@@ -118,6 +149,10 @@
   background: linear-gradient(90deg, #1d4ed8, #2563eb);
 }
 
+.btn-primary:hover {
+  filter: brightness(0.98);
+}
+
 .btn-primary:disabled {
   opacity: 0.7;
   cursor: not-allowed;
@@ -132,6 +167,65 @@
   font-weight: 800;
   color: #1e3a5f;
   background: #ffffff;
+}
+
+.btn-ghost:hover {
+  background: #f8fafc;
+}
+
+/* Add/Edit modal */
+.exam-form-modal .modal-content {
+  border-radius: 14px;
+  border: 1px solid #dbe8f7;
+  box-shadow: 0 18px 40px rgba(30, 58, 95, 0.16);
+}
+
+.exam-form-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.exam-form-modal-title {
+  margin: 0;
+  color: #1e3a5f;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.exam-form-modal-close {
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: #1e3a5f;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+}
+
+.exam-form-modal-body {
+  padding: 1rem;
+}
+
+.exam-form-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.exam-btn {
+  border-radius: 10px !important;
+  font-weight: 900 !important;
+}
+
+.exam-btn-save.btn-primary {
+  background: linear-gradient(90deg, #1d4ed8, #2563eb) !important;
+  border: none !important;
 }
 
 .exam-error {
