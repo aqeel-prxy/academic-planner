@@ -6,6 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import EventModal from './EventModal';
 import ExamDetailsModal from './ExamDetailsModal';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import './timetable.css';
 
@@ -40,7 +41,12 @@ const setStoredTimetableName = (key, name) => {
 
 const TimetableCalendar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const weekStart = getStartOfWeek(new Date());
+
   const [events, setEvents] = useState([]);
+  const [initialDate, setInitialDate] = useState(weekStart);
   const [showModal, setShowModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -50,8 +56,6 @@ const TimetableCalendar = () => {
   const [timetableList, setTimetableList] = useState([]);
   const [userCreatedTimetables, setUserCreatedTimetables] = useState([]);
   const [customNames, setCustomNames] = useState(getStoredTimetableNames);
-
-  const weekStart = getStartOfWeek(new Date());
 
   const toCalendarEvent = (e) => ({
     ...e,
@@ -130,12 +134,25 @@ const TimetableCalendar = () => {
           });
 
         setEvents([...classEvents, ...examEvents]);
+
+        const params = new URLSearchParams(location.search);
+        const focusExamId = params.get('focusExam');
+        if (focusExamId) {
+          const target = examsRaw.find((x) => String(x.id) === String(focusExamId));
+          if (target?.examDate) {
+            const startTime = target.startTime || '09:00';
+            const focusDate = new Date(`${target.examDate}T${startTime}`);
+            setInitialDate(focusDate);
+            setSelectedExam(target);
+            setShowExamModal(true);
+          }
+        }
       } catch (error) {
         console.error('Failed to load events:', error);
       }
     };
     loadEvents();
-  }, [currentTimetableKey]);
+  }, [currentTimetableKey, location.search]);
 
   // ✅ Conflict Detection Business Rule
   const checkForConflicts = (newStart, newEnd, excludeId = null) => {
@@ -333,7 +350,7 @@ const TimetableCalendar = () => {
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
-          initialDate={weekStart}
+          initialDate={initialDate}
           firstDay={1}
           dayHeaderFormat={{ weekday: 'short' }}
           editable={true}
