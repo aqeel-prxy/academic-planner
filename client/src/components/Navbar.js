@@ -29,6 +29,17 @@ const Navbar = () => {
           >
             Visual Timetable
           </NavLink>
+
+          <NavLink
+            to="#"
+            className={({ isActive }) =>
+              `nav-link ${isActive ? 'active' : ''}`
+            }
+          >
+            Exam Preparation
+          </NavLink>
+
+
         </div>
       </div>
     </nav>
