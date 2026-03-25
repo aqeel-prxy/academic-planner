@@ -105,9 +105,7 @@ const TimetableCalendar = () => {
 
         const classEvents = (Array.isArray(classEventsRes) ? classEventsRes : []).map(toCalendarEvent);
 
-        const examsRaw = Array.isArray(examsRes)
-          ? examsRes
-          : (examsRes && Array.isArray(examsRes.data) ? examsRes.data : []);
+        const examsRaw = Array.isArray(examsRes) ? examsRes : [];
 
         const examEvents = examsRaw
           .filter((x) => x && x.examDate)
@@ -138,13 +136,18 @@ const TimetableCalendar = () => {
         const params = new URLSearchParams(location.search);
         const focusExamId = params.get('focusExam');
         if (focusExamId) {
-          const target = examsRaw.find((x) => String(x.id) === String(focusExamId));
-          if (target?.examDate) {
-            const startTime = target.startTime || '09:00';
-            const focusDate = new Date(`${target.examDate}T${startTime}`);
-            setInitialDate(focusDate);
-            setSelectedExam(target);
-            setShowExamModal(true);
+          try {
+            const fetched = await api.getExamPreparationById(focusExamId);
+            const target = fetched && fetched.examDate ? fetched : examsRaw.find((x) => String(x.id) === String(focusExamId));
+            if (target?.examDate) {
+              const startTime = target.startTime || '09:00';
+              const focusDate = new Date(`${target.examDate}T${startTime}`);
+              setInitialDate(focusDate);
+              setSelectedExam(target);
+              setShowExamModal(true);
+            }
+          } catch {
+            // ignore; fallback is not opening modal
           }
         }
       } catch (error) {
