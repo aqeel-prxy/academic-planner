@@ -31,7 +31,7 @@ const Navbar = () => {
           </NavLink>
 
           <NavLink
-            to="#"
+            to="/exam-preparation"
             className={({ isActive }) =>
               `nav-link ${isActive ? 'active' : ''}`
             }
