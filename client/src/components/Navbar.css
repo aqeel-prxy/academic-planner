@@ -57,6 +57,21 @@
   -webkit-text-fill-color: transparent;
 }
 
+.navbar-brand-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.03rem;
+  line-height: 1;
+}
+
+.navbar-logo-sub {
+  color: rgba(226, 232, 240, 0.8);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 /* === Links === */
 .navbar-links {
   display: flex;
@@ -71,6 +86,28 @@
   gap: 0.55rem;
   position: relative;
 }
+
+/* Attendance risk dot */
+.nav-attendance-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  position: relative;
+}
+
+.nav-risk-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  border: 2px solid rgba(15, 23, 42, 0.85);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.10);
+}
+
+.nav-risk-dot--green { background: #10b981; }
+.nav-risk-dot--yellow { background: #f59e0b; }
+.nav-risk-dot--red { background: #dc2626; }
+.nav-risk-dot--unknown { background: #64748b; }
 
 .nav-bell {
   position: relative;

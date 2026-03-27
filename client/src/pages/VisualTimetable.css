@@ -1,23 +1,24 @@
 .visual-timetable-page {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0.75rem 1.25rem 1rem;
+  padding: 0.8rem 1.1rem 1rem;
   min-height: calc(100vh - 64px);
   box-sizing: border-box;
 }
 
 .timetable-page-header {
   margin-bottom: 0.75rem;
-  padding: 0.6rem 1rem;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(155deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
 .timetable-page-header h1 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1e3a5f;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
   margin: 0 0 0.15rem 0;
   letter-spacing: -0.02em;
 }
@@ -26,6 +27,24 @@
   margin: 0;
   color: #64748b;
   font-size: 0.8rem;
+}
+
+.timetable-page-links {
+  margin-top: 0.55rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.timetable-page-links a {
+  text-decoration: none;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 999px;
+  font-weight: 900;
+  padding: 0.3rem 0.62rem;
+  font-size: 0.78rem;
 }
 
 .timetable-wrapper {
