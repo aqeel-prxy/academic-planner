@@ -1,11 +1,10 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 const api = {
-  // Events (optional timetableKey for split-student timetables)
-  getEvents: async (timetableKey = 'default') => {
-    const response = await axios.get(`${API_URL}/events`, { params: { timetableKey } });
+  getEvents: async () => {
+    const response = await axios.get(`${API_URL}/events`);
     return response.data;
   },
 
@@ -14,64 +13,47 @@ const api = {
     return response.data;
   },
 
-  // Timetable versions (e.g. My Week, Weekend 5.1, 5.2)
-  getTimetables: async () => {
-    const response = await axios.get(`${API_URL}/timetables`);
-    return response.data;
-  },
-  
   updateEvent: async (id, event) => {
     const response = await axios.put(`${API_URL}/events/${id}`, event);
     return response.data;
   },
-  
+
   deleteEvent: async (id) => {
     const response = await axios.delete(`${API_URL}/events/${id}`);
     return response.data;
   },
-  
-  // Courses for current timetable only (no past subjects in new timetable)
-  getCourses: async (timetableKey = 'default') => {
-    const response = await axios.get(`${API_URL}/timetables/${encodeURIComponent(timetableKey)}/courses`);
+
+  getTimetables: async () => ([
+    { key: 'default', name: 'My Week' }
+  ]),
+
+  getAssignments: async (params = {}) => {
+    const response = await axios.get(`${API_URL}/assignments`, { params });
     return response.data;
   },
 
-  // Attendance (per timetable)
-  getAttendance: async (timetableKey = 'default') => {
-    const response = await axios.get(`${API_URL}/attendance`, { params: { timetableKey } });
+  getAssignmentSummary: async () => {
+    const response = await axios.get(`${API_URL}/assignments/summary`);
     return response.data;
-  },
-  upsertAttendance: async (data) => {
-    const response = await axios.post(`${API_URL}/attendance`, data);
-    return response.data;
-  },
-  updateAttendance: async (id, data) => {
-    const response = await axios.put(`${API_URL}/attendance/${id}`, data);
-    return response.data;
-  },
-  deleteAttendance: async (id) => {
-    await axios.delete(`${API_URL}/attendance/${id}`);
   },
 
-  // Exam preparation
-  getExamPreparations: async () => {
-    const response = await axios.get(`${API_URL}/exam-preparation`);
+  getAssignmentById: async (id) => {
+    const response = await axios.get(`${API_URL}/assignments/${id}`);
     return response.data;
   },
-  getExamPreparationById: async (id) => {
-    const response = await axios.get(`${API_URL}/exam-preparation/${id}`);
-    return response.data?.data || response.data;
+
+  createAssignment: async (assignment) => {
+    const response = await axios.post(`${API_URL}/assignments`, assignment);
+    return response.data;
   },
-  createExamPreparation: async (payload) => {
-    const response = await axios.post(`${API_URL}/exam-preparation`, payload);
-    return response.data?.data || response.data;
+
+  updateAssignment: async (id, assignment) => {
+    const response = await axios.put(`${API_URL}/assignments/${id}`, assignment);
+    return response.data;
   },
-  updateExamPreparation: async (id, payload) => {
-    const response = await axios.put(`${API_URL}/exam-preparation/${id}`, payload);
-    return response.data?.data || response.data;
-  },
-  deleteExamPreparation: async (id) => {
-    const response = await axios.delete(`${API_URL}/exam-preparation/${id}`);
+
+  deleteAssignment: async (id) => {
+    const response = await axios.delete(`${API_URL}/assignments/${id}`);
     return response.data;
   }
 };

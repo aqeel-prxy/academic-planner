@@ -21,7 +21,7 @@ const formatTimeRangeDisplay = (startStr, endStr) => {
   return `${formatTimeForDisplay(startStr)} – ${formatTimeForDisplay(endStr)}`;
 };
 
-const EventModal = ({ show, onHide, onSave, eventData, selectedSlot, timetableKey = 'default', courseSuggestions = [], modules = [], preselectedModule = null, defaultSlotForModule = null }) => {
+const EventModal = ({ show, onHide, onSave, eventData, selectedSlot }) => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     id: null,
@@ -33,7 +33,7 @@ const EventModal = ({ show, onHide, onSave, eventData, selectedSlot, timetableKe
     backgroundColor: '#3788d8'
   });
 
-  // Populate form when opening: editing existing event, new event from slot, or "add class" from module
+  // Populate form when opening: editing existing event or new event from slot
   useEffect(() => {
     if (!show) return;
     if (eventData) {
@@ -47,20 +47,17 @@ const EventModal = ({ show, onHide, onSave, eventData, selectedSlot, timetableKe
         backgroundColor: eventData.backgroundColor || '#3788d8'
       });
     } else if (selectedSlot) {
-      const slot = defaultSlotForModule || selectedSlot;
-      const start = toLocalDatetime(slot.start);
-      const end = toLocalDatetime(slot.end);
       setFormData({
         id: null,
-        title: preselectedModule ? (preselectedModule.title || preselectedModule.courseCode || '') : '',
-        courseCode: preselectedModule ? (preselectedModule.courseCode || '') : '',
-        start,
-        end,
+        title: '',
+        courseCode: '',
+        start: toLocalDatetime(selectedSlot.start),
+        end: toLocalDatetime(selectedSlot.end),
         location: '',
         backgroundColor: '#3788d8'
       });
     }
-  }, [show, eventData, selectedSlot, preselectedModule, defaultSlotForModule]);
+  }, [show, eventData, selectedSlot]);
 
   const handleChange = (e) => {
     setFormData({
@@ -134,34 +131,6 @@ const EventModal = ({ show, onHide, onSave, eventData, selectedSlot, timetableKe
           </div>
         )}
         <Form>
-          {modules && modules.length > 0 && (
-            <div className="event-form-section">
-              <span className="event-form-section-label">Module (this timetable)</span>
-              <Form.Group className="mb-3">
-                <Form.Select
-                  className="event-form-control"
-                  value={formData.courseCode}
-                  onChange={(e) => {
-                    const mod = modules.find((m) => m.courseCode === e.target.value);
-                    if (mod) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        courseCode: mod.courseCode,
-                        title: mod.moduleName || mod.courseCode
-                      }));
-                    }
-                  }}
-                >
-                  <option value="">— Select a module —</option>
-                  {modules.map((m) => (
-                    <option key={m.id} value={m.courseCode}>
-                      {m.moduleName || m.courseCode} ({m.courseCode})
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </div>
-          )}
           <div className="event-form-section">
             <span className="event-form-section-label">Course</span>
             <Row>
@@ -188,15 +157,7 @@ const EventModal = ({ show, onHide, onSave, eventData, selectedSlot, timetableKe
                     onChange={handleChange}
                     placeholder="e.g., IT3040"
                     className="event-form-control"
-                    list={!modules?.length && courseSuggestions.length > 0 ? 'event-modal-course-list' : undefined}
                   />
-                  {!modules?.length && courseSuggestions.length > 0 && (
-                    <datalist id="event-modal-course-list">
-                      {courseSuggestions.map((c, i) => (
-                        <option key={i} value={c.courseCode} label={c.title} />
-                      ))}
-                    </datalist>
-                  )}
                 </Form.Group>
               </Col>
             </Row>
