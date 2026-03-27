@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import EventModal from './EventModal';
-import ExamDetailsModal from './ExamDetailsModal';
-import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import './timetable.css';
 
@@ -23,6 +20,7 @@ const getStartOfWeek = (date) => {
 const slugify = (name) => name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
 const TIMETABLE_NAMES_KEY = 'academicPlanner_timetableNames';
+const DEFAULT_TIMETABLES = [{ key: 'default', name: 'My Week' }];
 
 const getStoredTimetableNames = () => {
   try {
@@ -40,22 +38,16 @@ const setStoredTimetableName = (key, name) => {
 };
 
 const TimetableCalendar = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const weekStart = getStartOfWeek(new Date());
-
   const [events, setEvents] = useState([]);
-  const [initialDate, setInitialDate] = useState(weekStart);
   const [showModal, setShowModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [showExamModal, setShowExamModal] = useState(false);
-  const [selectedExam, setSelectedExam] = useState(null);
   const [currentTimetableKey, setCurrentTimetableKey] = useState('default');
   const [timetableList, setTimetableList] = useState([]);
   const [userCreatedTimetables, setUserCreatedTimetables] = useState([]);
   const [customNames, setCustomNames] = useState(getStoredTimetableNames);
+
+  const weekStart = getStartOfWeek(new Date());
 
   const toCalendarEvent = (e) => ({
     ...e,
@@ -65,97 +57,53 @@ const TimetableCalendar = () => {
     }
   });
 
-  const displayName = (key, fallbackName) => customNames[key] || fallbackName || key;
+  const displayName = useCallback((key, fallbackName) => customNames[key] || fallbackName || key, [customNames]);
 
-  const allTimetables = () => {
+  const allTimetables = useMemo(() => {
     const byKey = {};
     [...timetableList, ...userCreatedTimetables].forEach(t => {
       byKey[t.key] = displayName(t.key, t.name);
     });
     return Object.entries(byKey).map(([key, name]) => ({ key, name }));
-  };
+  }, [displayName, timetableList, userCreatedTimetables]);
 
   useEffect(() => {
     setCustomNames(getStoredTimetableNames());
   }, []);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const list = await api.getTimetables();
-        setTimetableList(list.length > 0 ? list : [{ key: 'default', name: 'My Week' }]);
-        if (list.length > 0 && !list.find(t => t.key === currentTimetableKey) && !userCreatedTimetables.find(t => t.key === currentTimetableKey)) {
-          setCurrentTimetableKey(list[0].key);
-        }
-      } catch (err) {
-        console.error('Failed to load timetables:', err);
-        setTimetableList([{ key: 'default', name: 'My Week' }]);
+  const loadTimetables = useCallback(async () => {
+    try {
+      const list = await api.getTimetables();
+      const nextTimetables = list.length > 0 ? list : DEFAULT_TIMETABLES;
+      setTimetableList(nextTimetables);
+      if (
+        nextTimetables.length > 0 &&
+        !nextTimetables.find((t) => t.key === currentTimetableKey) &&
+        !userCreatedTimetables.find((t) => t.key === currentTimetableKey)
+      ) {
+        setCurrentTimetableKey(nextTimetables[0].key);
       }
-    };
-    load();
-  }, []);
+    } catch (err) {
+      console.error('Failed to load timetables:', err);
+      setTimetableList(DEFAULT_TIMETABLES);
+    }
+  }, [currentTimetableKey, userCreatedTimetables]);
+
+  useEffect(() => {
+    loadTimetables();
+  }, [loadTimetables]);
 
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const [classEventsRes, examsRes] = await Promise.all([
-          api.getEvents(currentTimetableKey),
-          api.getExamPreparations()
-        ]);
-
-        const classEvents = (Array.isArray(classEventsRes) ? classEventsRes : []).map(toCalendarEvent);
-
-        const examsRaw = Array.isArray(examsRes) ? examsRes : [];
-
-        const examEvents = examsRaw
-          .filter((x) => x && x.examDate)
-          .map((x) => {
-            const startTime = x.startTime || '09:00';
-            const endTime = x.endTime || '10:00';
-            const start = new Date(`${x.examDate}T${startTime}`);
-            const end = new Date(`${x.examDate}T${endTime}`);
-            return {
-              id: `exam-${x.id}`,
-              title: `EXAM • ${x.subject || ''}${x.subject && x.examTitle ? ' • ' : ''}${x.examTitle || ''}`.trim(),
-              start,
-              end,
-              backgroundColor: '#dc2626',
-              borderColor: '#dc2626',
-              editable: false,
-              extendedProps: {
-                isExam: true,
-                examData: x,
-                courseCode: x.subject || 'EXAM',
-                location: x.venue || ''
-              }
-            };
-          });
-
-        setEvents([...classEvents, ...examEvents]);
-
-        const params = new URLSearchParams(location.search);
-        const focusExamId = params.get('focusExam');
-        if (focusExamId) {
-          try {
-            const fetched = await api.getExamPreparationById(focusExamId);
-            const target = fetched && fetched.examDate ? fetched : examsRaw.find((x) => String(x.id) === String(focusExamId));
-            if (target?.examDate) {
-              const startTime = target.startTime || '09:00';
-              const focusDate = new Date(`${target.examDate}T${startTime}`);
-              setInitialDate(focusDate);
-              setSelectedExam(target);
-              setShowExamModal(true);
-            }
-          } catch {
-            // ignore; fallback is not opening modal
-          }
-        }
+        const data = await api.getEvents(currentTimetableKey);
+        setEvents(data.map(toCalendarEvent));
       } catch (error) {
         console.error('Failed to load events:', error);
       }
     };
     loadEvents();
-  }, [currentTimetableKey, location.search]);
+  }, [currentTimetableKey]);
 
   // ✅ Conflict Detection Business Rule
   const checkForConflicts = (newStart, newEnd, excludeId = null) => {
@@ -207,17 +155,6 @@ const TimetableCalendar = () => {
   };
 
   const handleEventClick = (info) => {
-    const isExam = Boolean(info.event.extendedProps?.isExam);
-    if (isExam) {
-      setSelectedEvent(null);
-      setSelectedSlot(null);
-      setShowModal(false);
-
-      setSelectedExam(info.event.extendedProps?.examData || null);
-      setShowExamModal(true);
-      return;
-    }
-
     setSelectedEvent(info.event);
     setSelectedSlot(null);
     setShowModal(true);
@@ -338,7 +275,7 @@ const TimetableCalendar = () => {
           onChange={(e) => setCurrentTimetableKey(e.target.value)}
           aria-label="Select timetable"
         >
-          {allTimetables().map(t => (
+          {allTimetables.map(t => (
             <option key={t.key} value={t.key}>{t.name}</option>
           ))}
         </select>
@@ -353,7 +290,7 @@ const TimetableCalendar = () => {
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
-          initialDate={initialDate}
+          initialDate={weekStart}
           firstDay={1}
           dayHeaderFormat={{ weekday: 'short' }}
           editable={true}
@@ -381,18 +318,6 @@ const TimetableCalendar = () => {
         onSave={handleSaveEvent}
         eventData={selectedEvent}
         selectedSlot={selectedSlot}
-      />
-
-      <ExamDetailsModal
-        show={showExamModal}
-        onHide={() => setShowExamModal(false)}
-        exam={selectedExam}
-        onEdit={(exam) => {
-          setShowExamModal(false);
-          if (exam?.id) {
-            navigate(`/exam-preparation?edit=${encodeURIComponent(exam.id)}`);
-          }
-        }}
       />
     </>
   );
