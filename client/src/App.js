@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import AssignmentDashboard from './pages/AssignmentDashboard';
 import VisualTimetable from './pages/VisualTimetable';
+import ExamPreparation from './pages/examPreparation';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './components/Navbar.css';
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<Navigate to="/timetable" replace />} />
             <Route path="/assignments" element={<AssignmentDashboard />} />
             <Route path="/timetable" element={<VisualTimetable />} />
+            <Route path="/exam-preparation" element={<ExamPreparation />} />
           </Routes>
         </main>
       </div>

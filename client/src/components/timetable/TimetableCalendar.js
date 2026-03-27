@@ -4,6 +4,9 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import EventModal from './EventModal';
+import ExamDetailsModal from './ExamDetailsModal';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import './timetable.css';
 
@@ -37,16 +40,22 @@ const setStoredTimetableName = (key, name) => {
 };
 
 const TimetableCalendar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const weekStart = getStartOfWeek(new Date());
+
   const [events, setEvents] = useState([]);
+  const [initialDate, setInitialDate] = useState(weekStart);
   const [showModal, setShowModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [showExamModal, setShowExamModal] = useState(false);
+  const [selectedExam, setSelectedExam] = useState(null);
   const [currentTimetableKey, setCurrentTimetableKey] = useState('default');
   const [timetableList, setTimetableList] = useState([]);
   const [userCreatedTimetables, setUserCreatedTimetables] = useState([]);
   const [customNames, setCustomNames] = useState(getStoredTimetableNames);
-
-  const weekStart = getStartOfWeek(new Date());
 
   const toCalendarEvent = (e) => ({
     ...e,
@@ -89,14 +98,64 @@ const TimetableCalendar = () => {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const data = await api.getEvents(currentTimetableKey);
-        setEvents(data.map(toCalendarEvent));
+        const [classEventsRes, examsRes] = await Promise.all([
+          api.getEvents(currentTimetableKey),
+          api.getExamPreparations()
+        ]);
+
+        const classEvents = (Array.isArray(classEventsRes) ? classEventsRes : []).map(toCalendarEvent);
+
+        const examsRaw = Array.isArray(examsRes) ? examsRes : [];
+
+        const examEvents = examsRaw
+          .filter((x) => x && x.examDate)
+          .map((x) => {
+            const startTime = x.startTime || '09:00';
+            const endTime = x.endTime || '10:00';
+            const start = new Date(`${x.examDate}T${startTime}`);
+            const end = new Date(`${x.examDate}T${endTime}`);
+            return {
+              id: `exam-${x.id}`,
+              title: `EXAM • ${x.subject || ''}${x.subject && x.examTitle ? ' • ' : ''}${x.examTitle || ''}`.trim(),
+              start,
+              end,
+              backgroundColor: '#dc2626',
+              borderColor: '#dc2626',
+              editable: false,
+              extendedProps: {
+                isExam: true,
+                examData: x,
+                courseCode: x.subject || 'EXAM',
+                location: x.venue || ''
+              }
+            };
+          });
+
+        setEvents([...classEvents, ...examEvents]);
+
+        const params = new URLSearchParams(location.search);
+        const focusExamId = params.get('focusExam');
+        if (focusExamId) {
+          try {
+            const fetched = await api.getExamPreparationById(focusExamId);
+            const target = fetched && fetched.examDate ? fetched : examsRaw.find((x) => String(x.id) === String(focusExamId));
+            if (target?.examDate) {
+              const startTime = target.startTime || '09:00';
+              const focusDate = new Date(`${target.examDate}T${startTime}`);
+              setInitialDate(focusDate);
+              setSelectedExam(target);
+              setShowExamModal(true);
+            }
+          } catch {
+            // ignore; fallback is not opening modal
+          }
+        }
       } catch (error) {
         console.error('Failed to load events:', error);
       }
     };
     loadEvents();
-  }, [currentTimetableKey]);
+  }, [currentTimetableKey, location.search]);
 
   // ✅ Conflict Detection Business Rule
   const checkForConflicts = (newStart, newEnd, excludeId = null) => {
@@ -148,6 +207,17 @@ const TimetableCalendar = () => {
   };
 
   const handleEventClick = (info) => {
+    const isExam = Boolean(info.event.extendedProps?.isExam);
+    if (isExam) {
+      setSelectedEvent(null);
+      setSelectedSlot(null);
+      setShowModal(false);
+
+      setSelectedExam(info.event.extendedProps?.examData || null);
+      setShowExamModal(true);
+      return;
+    }
+
     setSelectedEvent(info.event);
     setSelectedSlot(null);
     setShowModal(true);
@@ -283,7 +353,7 @@ const TimetableCalendar = () => {
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
-          initialDate={weekStart}
+          initialDate={initialDate}
           firstDay={1}
           dayHeaderFormat={{ weekday: 'short' }}
           editable={true}
@@ -311,6 +381,18 @@ const TimetableCalendar = () => {
         onSave={handleSaveEvent}
         eventData={selectedEvent}
         selectedSlot={selectedSlot}
+      />
+
+      <ExamDetailsModal
+        show={showExamModal}
+        onHide={() => setShowExamModal(false)}
+        exam={selectedExam}
+        onEdit={(exam) => {
+          setShowExamModal(false);
+          if (exam?.id) {
+            navigate(`/exam-preparation?edit=${encodeURIComponent(exam.id)}`);
+          }
+        }}
       />
     </>
   );
