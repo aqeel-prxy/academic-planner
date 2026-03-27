@@ -24,6 +24,7 @@ app.use(morgan('dev'));
 
 // Import model
 const Event = require('./models/Event');
+const ExamPreparation = require('./models/ExamPreparationModel');
 
 // Sync database (creates tables if they don't exist)
 sequelize.sync({ alter: true })
@@ -41,6 +42,13 @@ try {
   // Use the routes
   app.use('/api/events', eventRoutes);
   console.log('✅ Routes mounted at /api/events');
+
+  const examPreparationRoutes = require('./routes/examPreparationRoutes');
+  console.log('✅ Exam preparation routes loaded successfully');
+  app.use('/api/exam-preparation', examPreparationRoutes);
+  console.log('✅ Exam preparation routes mounted at /api/exam-preparation');
+
+  
 } catch (error) {
   console.error('❌ Failed to load routes:', error.message);
   console.error('❌ Stack trace:', error.stack);
@@ -61,7 +69,9 @@ app.get('/api/test', (req, res) => {
     message: '✅ API test endpoint working',
     routes: {
       events: '/api/events',
-      test: '/api/test'
+      test: '/api/test',
+      examPreparation: '/api/exam-preparation'
+
     }
   });
 });
@@ -71,7 +81,7 @@ app.use((req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
     message: `Cannot ${req.method} ${req.url}`,
-    availableRoutes: ['/', '/api/test', '/api/events']
+    availableRoutes: ['/', '/api/test', '/api/events', '/api/exam-preparation']
   });
 });
 
@@ -89,6 +99,7 @@ app.listen(PORT, () => {
   console.log(`\n🚀 Server running on http://localhost:${PORT}`);
   console.log(`📝 Test endpoint: http://localhost:${PORT}/api/test`);
   console.log(`📅 Events endpoint: http://localhost:${PORT}/api/events`);
+  console.log(`📚 Exam Preparation endpoint: http://localhost:${PORT}/api/exam-preparation`);
   console.log(`💾 Database: SQLite (database.sqlite)`);
 });
 
