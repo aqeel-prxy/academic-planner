@@ -1,5 +1,11 @@
 echo "*.sqlite" >> .gitignore
 echo "*.sqlite-journal" >> .gitignore
 
-# Module Organizer uploaded files (PDF, Office, images)
-server/uploads/
+# Never commit git metadata archives (too large for GitHub)
+.git.zip
+
+# Ignore node modules folder since it contains local dependencies
+# These can be installed via npm install, no need to track in Git
+node_modules/
+
+
