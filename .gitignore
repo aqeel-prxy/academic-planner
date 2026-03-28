@@ -7,5 +7,9 @@ echo "*.sqlite-journal" >> .gitignore
 # Ignore node modules folder since it contains local dependencies
 # These can be installed via npm install, no need to track in Git
 node_modules/
+client/node_modules/
+server/node_modules/
+server/database.sqlite
+.env
 
 
