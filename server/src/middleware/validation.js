@@ -38,4 +38,24 @@ const validateEventUpdate = [
   body('borderColor').optional().isString()
 ];
 
-module.exports = { validateEvent, validateEventUpdate };
+const validateModule = [
+  body('moduleCode').notEmpty().withMessage('Module code is required'),
+  body('moduleName').notEmpty().withMessage('Module name is required'),
+  body('semester').notEmpty().isInt().withMessage('Semester is required and must be an integer'),
+  body('year').notEmpty().isInt().withMessage('Year is required and must be an integer'),
+  body('credits').optional().isInt().withMessage('Credits must be an integer'),
+  body('targetGrade').optional().isFloat().withMessage('Target grade must be a number'),
+  body('instructor').optional().isString()
+];
+
+const validateGrade = [
+  body('moduleId').notEmpty().withMessage('Module ID is required'),
+  body('semester').optional().isInt().withMessage('Semester must be an integer'),
+  body('week').optional().isInt().withMessage('Week must be an integer'),
+  body('midExamMarks').optional().isFloat({ min: 0, max: 100 }).withMessage('Mid exam marks must be between 0 and 100'),
+  body('quizMarks').optional().isFloat({ min: 0, max: 100 }).withMessage('Quiz marks must be between 0 and 100'),
+  body('assignmentMarks').optional().isFloat({ min: 0, max: 100 }).withMessage('Assignment marks must be between 0 and 100'),
+  body('finalExamMarks').optional().isFloat({ min: 0, max: 100 }).withMessage('Final exam marks must be between 0 and 100')
+];
+
+module.exports = { validateEvent, validateEventUpdate, validateModule, validateGrade };
