@@ -22,8 +22,14 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Import model
+// Import models
 const Event = require('./models/Event');
+const Module = require('./models/Module');
+const Grade = require('./models/Grade');
+const ModuleResource = require('./models/ModuleResource');
+
+Module.hasMany(ModuleResource, { foreignKey: 'moduleId', onDelete: 'CASCADE', hooks: true });
+ModuleResource.belongsTo(Module, { foreignKey: 'moduleId' });
 
 // Sync database (creates tables if they don't exist)
 sequelize.sync({ alter: true })
@@ -34,13 +40,17 @@ sequelize.sync({ alter: true })
 console.log('🔄 Loading routes...');
 try {
   const eventRoutes = require('./routes/eventRoutes');
-  console.log('✅ Routes file loaded successfully');
-  console.log('📋 Routes object type:', typeof eventRoutes);
-  console.log('📋 Is router function:', typeof eventRoutes === 'function');
+  const moduleRoutes = require('./routes/moduleRoutes');
+  const gradeRoutes = require('./routes/gradeRoutes');
+  const moduleResourceRoutes = require('./routes/moduleResourceRoutes');
+  console.log('✅ Routes files loaded successfully');
   
   // Use the routes
   app.use('/api/events', eventRoutes);
-  console.log('✅ Routes mounted at /api/events');
+  app.use('/api/modules', moduleRoutes);
+  app.use('/api/grades', gradeRoutes);
+  app.use('/api/module-resources', moduleResourceRoutes);
+  console.log('✅ All routes mounted successfully');
 } catch (error) {
   console.error('❌ Failed to load routes:', error.message);
   console.error('❌ Stack trace:', error.stack);
@@ -89,6 +99,9 @@ app.listen(PORT, () => {
   console.log(`\n🚀 Server running on http://localhost:${PORT}`);
   console.log(`📝 Test endpoint: http://localhost:${PORT}/api/test`);
   console.log(`📅 Events endpoint: http://localhost:${PORT}/api/events`);
+  console.log(`📘 Modules endpoint: http://localhost:${PORT}/api/modules`);
+  console.log(`📊 Grades endpoint: http://localhost:${PORT}/api/grades`);
+  console.log(`📁 Module resources: http://localhost:${PORT}/api/module-resources`);
   console.log(`💾 Database: SQLite (database.sqlite)`);
 });
 
