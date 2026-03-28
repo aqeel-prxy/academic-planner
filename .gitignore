@@ -1,2 +1,5 @@
 echo "*.sqlite" >> .gitignore
 echo "*.sqlite-journal" >> .gitignore
+
+# Module Organizer uploaded files (PDF, Office, images)
+server/uploads/
