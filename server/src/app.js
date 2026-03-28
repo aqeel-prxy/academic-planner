@@ -31,10 +31,23 @@ const ModuleResource = require('./models/ModuleResource');
 Module.hasMany(ModuleResource, { foreignKey: 'moduleId', onDelete: 'CASCADE', hooks: true });
 ModuleResource.belongsTo(Module, { foreignKey: 'moduleId' });
 
-// Sync database (creates tables if they don't exist)
-sequelize.sync({ alter: true })
-  .then(() => console.log('✅ Database synced'))
-  .catch(err => console.error('❌ Database sync failed:', err));
+// Sync database (creates / alters tables). ModuleResources is synced separately so it still
+// gets created if a global alter fails (common on SQLite with FK constraints).
+async function syncDatabase() {
+  try {
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database synced');
+  } catch (err) {
+    console.error('❌ Database sync failed:', err.message);
+  }
+  try {
+    await ModuleResource.sync({ alter: true });
+    console.log('✅ Module organizer table (ModuleResources) ready');
+  } catch (err) {
+    console.error('❌ ModuleResources sync failed:', err.message);
+  }
+}
+syncDatabase();
 
 // Debug - check if routes file exists and loads properly
 console.log('🔄 Loading routes...');
@@ -71,6 +84,9 @@ app.get('/api/test', (req, res) => {
     message: '✅ API test endpoint working',
     routes: {
       events: '/api/events',
+      modules: '/api/modules',
+      grades: '/api/grades',
+      moduleResources: '/api/module-resources',
       test: '/api/test'
     }
   });
@@ -81,7 +97,14 @@ app.use((req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
     message: `Cannot ${req.method} ${req.url}`,
-    availableRoutes: ['/', '/api/test', '/api/events']
+    availableRoutes: [
+      '/',
+      '/api/test',
+      '/api/events',
+      '/api/modules',
+      '/api/grades',
+      '/api/module-resources'
+    ]
   });
 });
 

@@ -143,15 +143,28 @@ const api = {
     return response.data;
   },
 
+  /** multipart/form-data; field name for file: `document` */
+  createModuleResourceForm: async (formData) => {
+    const response = await axios.post(`${API_URL}/module-resources`, formData);
+    return response.data;
+  },
+
   updateModuleResource: async (id, payload) => {
     const response = await axios.put(`${API_URL}/module-resources/${id}`, payload);
+    return response.data;
+  },
+
+  updateModuleResourceForm: async (id, formData) => {
+    const response = await axios.put(`${API_URL}/module-resources/${id}`, formData);
     return response.data;
   },
 
   deleteModuleResource: async (id) => {
     const response = await axios.delete(`${API_URL}/module-resources/${id}`);
     return response.data;
-  }
+  },
+
+  getModuleResourceDownloadUrl: (id) => `${API_URL}/module-resources/${id}/download`
 };
 
 export default api;
