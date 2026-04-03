@@ -291,43 +291,65 @@ const classifyOpenAiError = (error) => {
   const code = toSafeText(error?.code || error?.error?.code).toLowerCase();
   const status = Number(error?.status || error?.statusCode || 0);
   const message = toSafeText(error?.message || error?.error?.message).toLowerCase();
+  const errorType = toSafeText(error?.error?.error_type || "").toLowerCase();
   const providerConfig = resolveProviderConfig();
   const usingXai = providerConfig.provider === "xai";
   const usingGemini = providerConfig.provider === "gemini";
 
-  if (code === "insufficient_quota" || status === 429) {
+  // Debug: Log full error for analysis
+  console.error("Detailed error info:", {
+    code,
+    status,
+    message,
+    errorType,
+    provider: providerConfig.provider,
+    rawError: error?.error
+  });
+
+  if (code === "insufficient_quota" || status === 429 || message.includes("rate_limit") || message.includes("rate-limit")) {
     return {
       mode: "quota_exceeded",
-      reason: "Provider quota is exceeded for the current API key.",
+      reason: "Provider API rate limit or quota exceeded.",
       answer: usingGemini
         ? "I cannot generate a full AI answer right now because the Gemini API quota for this key has been exceeded. Please add billing/credits or use a different Gemini key, then ask again."
         : "I cannot generate a full AI answer right now because the API quota for this key has been exceeded. Please add billing/credits or use a different key, then ask again.",
     };
   }
 
-  if (code === "invalid_api_key" || status === 401) {
+  if (code === "invalid_api_key" || status === 401 || errorType === "permission_denied" || message.includes("authentication") || message.includes("unauthorized")) {
     return {
       mode: "api_key_invalid",
       reason: "Invalid API key or provider endpoint mismatch.",
       answer: usingGemini
-        ? "Your Gemini key is invalid or the Gemini endpoint is incorrect. Set OPENAI_BASE_URL to https://generativelanguage.googleapis.com/v1beta/openai and use GEMINI_MODEL such as gemini-2.5-flash."
+        ? "Your Gemini API key is invalid or not authorized. Ensure your Google Cloud project has the Generative AI API enabled and the key has the right permissions. Check your GEMINI_API_KEY in .env."
         : usingXai
         ? "Your Grok/xAI key is not accepted with the current provider settings. Set OPENAI_BASE_URL to https://api.x.ai/v1 and use an xAI model such as grok-2-latest."
         : "The API key is invalid for the current provider. Check your key and try again.",
     };
   }
 
-  if (status === 403 && (message.includes("doesn't have any credits") || message.includes("credits") || message.includes("licenses"))) {
+  if (status === 403 && usingGemini) {
+    // 403 from Gemini typically means billing/project issue
+    return {
+      mode: "provider_credits_missing",
+      reason: "Gemini account has no billing or the API is not enabled.",
+      answer: "Your Google Cloud project does not have billing enabled for Gemini API, or the Generative AI API is not enabled. Set up billing in the Google Cloud Console and enable the Generative AI API for your project, then try again.",
+    };
+  }
+
+  if (status === 403 && (message.includes("doesn't have any credits") || message.includes("credits") || message.includes("licenses") || message.includes("not available"))) {
     return {
       mode: "provider_credits_missing",
       reason: "Provider account has no credits/licenses.",
       answer: usingXai
         ? "Your xAI team currently has no credits or licenses, so Grok cannot generate answers yet. Add credits/licenses in your xAI console, then try again."
+        : usingGemini
+        ? "Your Gemini/Google account currently has no credits or the model is not available. Add billing information, then try again."
         : "Your provider account currently has no credits or access for this model. Add credits/access, then try again.",
     };
   }
 
-  if (code === "model_not_found" || status === 404 || message.includes("model not found")) {
+  if (code === "model_not_found" || status === 404 || message.includes("model not found") || message.includes("not found")) {
     return {
       mode: "model_invalid",
       reason: "Configured model is not available for this provider.",
@@ -341,7 +363,7 @@ const classifyOpenAiError = (error) => {
 
   return {
     mode: "fallback",
-    reason: "OpenAI request failed.",
+    reason: `${error?.message || "API request failed"}`,
     answer: "",
   };
 };
@@ -433,6 +455,13 @@ const askExamAiQuestion = async ({ examId, question }) => {
       throw AppError("AI provider API key is missing on the server.", 500);
     }
 
+    console.log("Sending request to AI provider:", {
+      provider: resolveProviderConfig().provider,
+      model: getOpenAiModel(),
+      baseURL: getApiBaseUrl(),
+      messageCount: modelMessages.length
+    });
+
     const completion = await client.chat.completions.create({
       model: getOpenAiModel(),
       messages: modelMessages,
@@ -449,10 +478,12 @@ const askExamAiQuestion = async ({ examId, question }) => {
     console.error("AI askExamAiQuestion failed:", {
       provider: providerConfig.provider,
       baseURL: providerConfig.baseURL,
+      model: getOpenAiModel(),
       message: error.message,
       status: error.status,
       code: error.code,
       reason: failure.reason,
+      fullError: JSON.stringify(error, null, 2)
     });
 
     mode = failure.mode;
