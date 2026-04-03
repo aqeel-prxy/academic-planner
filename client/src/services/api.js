@@ -4,6 +4,30 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const EXAM_PREP_BASE = `${API_URL}/exam-preparation`;
 
+const toExamFormData = (payload) => {
+  const formData = new FormData();
+  const {
+    lecturePdfFiles = [],
+    lecturePdfs = [],
+    ...rest
+  } = payload || {};
+
+  Object.entries(rest).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      formData.append(key, '');
+      return;
+    }
+    formData.append(key, String(value));
+  });
+
+  formData.append('lecturePdfs', JSON.stringify(lecturePdfs));
+  lecturePdfFiles.forEach((file) => {
+    formData.append('lecturePdfs', file);
+  });
+
+  return formData;
+};
+
 const api = {
   // Events
   getEvents: async () => {
@@ -43,12 +67,30 @@ const api = {
   },
 
   createExamPreparation: async (payload) => {
-    const response = await axios.post(EXAM_PREP_BASE, payload);
+    const response = await axios.post(EXAM_PREP_BASE, toExamFormData(payload), {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return response.data;
   },
 
   updateExamPreparation: async (id, payload) => {
-    const response = await axios.put(`${EXAM_PREP_BASE}/${id}`, payload);
+    const response = await axios.put(`${EXAM_PREP_BASE}/${id}`, toExamFormData(payload), {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  },
+
+  updateExamPdfStatus: async (examId, pdfId, completed) => {
+    const response = await axios.patch(`${EXAM_PREP_BASE}/${examId}/pdfs/${pdfId}`, { completed });
+    return response.data;
+  },
+
+  deleteExamPdf: async (examId, pdfId) => {
+    const response = await axios.delete(`${EXAM_PREP_BASE}/${examId}/pdfs/${pdfId}`);
     return response.data;
   },
 
