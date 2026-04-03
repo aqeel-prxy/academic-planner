@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const path = require('path');
 const sequelize = require('./config/database');
 
 dotenv.config();
@@ -21,10 +22,12 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(morgan('dev'));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Import model
 const Event = require('./models/Event');
 const ExamPreparation = require('./models/ExamPreparationModel');
+const ExamAiChatSession = require('./models/ExamAiChatSession');
 
 // Sync database (creates tables if they don't exist)
 sequelize.sync({ alter: true })
@@ -70,7 +73,8 @@ app.get('/api/test', (req, res) => {
     routes: {
       events: '/api/events',
       test: '/api/test',
-      examPreparation: '/api/exam-preparation'
+      examPreparation: '/api/exam-preparation',
+      uploads: '/uploads/exam-pdfs/:file'
 
     }
   });
@@ -81,7 +85,7 @@ app.use((req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
     message: `Cannot ${req.method} ${req.url}`,
-    availableRoutes: ['/', '/api/test', '/api/events', '/api/exam-preparation']
+    availableRoutes: ['/', '/api/test', '/api/events', '/api/exam-preparation', '/uploads/exam-pdfs/:file']
   });
 });
 

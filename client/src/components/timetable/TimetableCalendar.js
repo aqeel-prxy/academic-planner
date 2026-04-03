@@ -120,7 +120,7 @@ const TimetableCalendar = () => {
               start,
               end,
               backgroundColor: '#dc2626',
-              borderColor: '#dc2626',
+              borderColor: '#b91c1c',
               editable: false,
               extendedProps: {
                 isExam: true,
