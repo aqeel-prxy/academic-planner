@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Navbar.css';
@@ -32,6 +32,7 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [readIds, setReadIds] = useState(getReadAlertIds);
+  const [attendanceRisk, setAttendanceRisk] = useState(null);
 
   const loadAlerts = async () => {
     try {
@@ -59,6 +60,44 @@ const Navbar = () => {
     const id = window.setInterval(loadAlerts, 60 * 1000);
     return () => window.clearInterval(id);
   }, []);
+
+  const computeRisk = useCallback((rows) => {
+    const toInt = (v) => {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return 0;
+      return Math.max(0, Math.floor(n));
+    };
+    const riskLevel = (r) => {
+      const req = toInt(r.requiredLectures);
+      const att = toInt(r.attendedLectures);
+      if (req <= 0) return 'unknown';
+      const ratio = att / req;
+      if (ratio >= 1) return 'green';
+      if (ratio >= 0.75) return 'yellow';
+      return 'red';
+    };
+    const levels = (Array.isArray(rows) ? rows : []).map(riskLevel);
+    if (levels.length === 0) return null;
+    if (levels.includes('red')) return 'red';
+    if (levels.includes('yellow')) return 'yellow';
+    if (levels.includes('green')) return 'green';
+    return 'unknown';
+  }, []);
+
+  const loadAttendanceRisk = useCallback(async () => {
+    try {
+      const rows = await api.getAttendance('default');
+      setAttendanceRisk(computeRisk(rows));
+    } catch {
+      setAttendanceRisk(null);
+    }
+  }, [computeRisk]);
+
+  useEffect(() => {
+    loadAttendanceRisk();
+    const id = window.setInterval(loadAttendanceRisk, 60 * 1000);
+    return () => window.clearInterval(id);
+  }, [loadAttendanceRisk]);
 
   useEffect(() => {
     const onDocClick = (e) => {
@@ -100,7 +139,10 @@ const Navbar = () => {
       <div className="navbar-inner">
         <NavLink to="/" className="navbar-brand" end>
           <span className="navbar-logo-icon">⬢</span>
-          <span className="navbar-logo-text">Nexora</span>
+          <span className="navbar-brand-stack">
+            <span className="navbar-logo-text">Nexora</span>
+            <span className="navbar-logo-sub">Academic Planner</span>
+          </span>
         </NavLink>
 
         <div className="navbar-links">
@@ -110,7 +152,7 @@ const Navbar = () => {
               `nav-link ${isActive ? 'active' : ''}`
             }
           >
-            Assignment Dashboard
+            Academic Hub
           </NavLink>
 
           <NavLink
@@ -120,6 +162,24 @@ const Navbar = () => {
             }
           >
             Visual Timetable
+          </NavLink>
+
+          <NavLink
+            to="/attendance-risk"
+            className={({ isActive }) =>
+              `nav-link ${isActive ? 'active' : ''}`
+            }
+          >
+            <span className="nav-attendance-wrap">
+              <span>Attendance Risk</span>
+              {attendanceRisk && (
+                <span
+                  className={`nav-risk-dot nav-risk-dot--${attendanceRisk}`}
+                  aria-label={`Attendance risk: ${attendanceRisk}`}
+                  title={`Attendance risk: ${attendanceRisk}`}
+                />
+              )}
+            </span>
           </NavLink>
 
           <NavLink
