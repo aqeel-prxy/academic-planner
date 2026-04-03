@@ -1,6 +1,5 @@
 const { body } = require('express-validator');
 
-// datetime-local sends "YYYY-MM-DDTHH:mm" - normalize to ISO with seconds for validation
 const normalizeDatetime = (v) => {
   if (typeof v !== 'string') return v;
   if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return v + ':00';
@@ -21,7 +20,6 @@ const validateEvent = [
   body('location').optional().isString()
 ];
 
-// For PUT: allow partial updates (e.g. drag/resize only sends start/end)
 const validateEventUpdate = [
   body('title').optional().notEmpty().withMessage('Title cannot be empty'),
   body('courseCode').optional().notEmpty().withMessage('Course code cannot be empty'),
@@ -58,4 +56,52 @@ const validateGrade = [
   body('finalExamMarks').optional().isFloat({ min: 0, max: 100 }).withMessage('Final exam marks must be between 0 and 100')
 ];
 
-module.exports = { validateEvent, validateEventUpdate, validateModule, validateGrade };
+const allowedAssignmentStatuses = ['Pending', 'Completed'];
+const allowedPriorities = ['High', 'Medium', 'Low'];
+
+const validateAssignment = [
+  body('title').trim().notEmpty().withMessage('Assignment title is required'),
+  body('course').trim().notEmpty().withMessage('Course is required'),
+  body('dueDate').isISO8601().withMessage('A valid due date is required')
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Due date must be in the future');
+      }
+      return true;
+    }),
+  body('weighting').isFloat({ min: 0, max: 100 }).withMessage('Weighting must be between 0 and 100'),
+  body('description').optional().isString(),
+  body('priority').isIn(allowedPriorities).withMessage('Priority must be High, Medium, or Low'),
+  body('status').optional().isIn(allowedAssignmentStatuses).withMessage('Status must be Pending or Completed'),
+  body('attachmentName').optional().isString(),
+  body('attachmentUrl').optional().isString(),
+  body('checklist').optional().isArray().withMessage('Checklist must be an array')
+];
+
+const validateAssignmentUpdate = [
+  body('title').optional().trim().notEmpty().withMessage('Assignment title cannot be empty'),
+  body('course').optional().trim().notEmpty().withMessage('Course cannot be empty'),
+  body('dueDate').optional().isISO8601().withMessage('A valid due date is required')
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Due date must be in the future');
+      }
+      return true;
+    }),
+  body('weighting').optional().isFloat({ min: 0, max: 100 }).withMessage('Weighting must be between 0 and 100'),
+  body('description').optional().isString(),
+  body('priority').optional().isIn(allowedPriorities).withMessage('Priority must be High, Medium, or Low'),
+  body('status').optional().isIn(allowedAssignmentStatuses).withMessage('Status must be Pending or Completed'),
+  body('attachmentName').optional().isString(),
+  body('attachmentUrl').optional().isString(),
+  body('checklist').optional().isArray().withMessage('Checklist must be an array')
+];
+
+module.exports = {
+  validateEvent,
+  validateEventUpdate,
+  validateModule,
+  validateGrade,
+  validateAssignment,
+  validateAssignmentUpdate
+};

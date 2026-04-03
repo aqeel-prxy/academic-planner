@@ -55,6 +55,37 @@ const api = {
     return response.data;
   },
 
+  // Assignments (Academic Hub)
+  getAssignments: async (params = {}) => {
+    const response = await axios.get(`${API_URL}/assignments`, { params });
+    return response.data;
+  },
+
+  getAssignmentSummary: async () => {
+    const response = await axios.get(`${API_URL}/assignments/summary`);
+    return response.data;
+  },
+
+  getAssignmentById: async (id) => {
+    const response = await axios.get(`${API_URL}/assignments/${id}`);
+    return response.data;
+  },
+
+  createAssignment: async (assignment) => {
+    const response = await axios.post(`${API_URL}/assignments`, assignment);
+    return response.data;
+  },
+
+  updateAssignment: async (id, assignment) => {
+    const response = await axios.put(`${API_URL}/assignments/${id}`, assignment);
+    return response.data;
+  },
+
+  deleteAssignment: async (id) => {
+    const response = await axios.delete(`${API_URL}/assignments/${id}`);
+    return response.data;
+  },
+
   // Exam preparation
   getExamPreparations: async () => {
     const response = await axios.get(EXAM_PREP_BASE);
@@ -187,7 +218,6 @@ const api = {
     return response.data;
   },
 
-  // Timetable-linked courses (per timetable version)
   getTimetableCourses: async (timetableKey = 'default') => {
     const response = await axios.get(`${API_URL}/timetables/${encodeURIComponent(timetableKey)}/courses`);
     return response.data;
@@ -223,7 +253,6 @@ const api = {
     return response.data;
   },
 
-  // multipart/form-data; field name for file: `document`
   createModuleResourceForm: async (formData) => {
     const response = await axios.post(`${API_URL}/module-resources`, formData);
     return response.data;
