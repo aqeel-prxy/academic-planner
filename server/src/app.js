@@ -27,6 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Import model
 const Event = require('./models/Event');
 const ExamPreparation = require('./models/ExamPreparationModel');
+const ExamAiChatSession = require('./models/ExamAiChatSession');
 
 // Sync database (creates tables if they don't exist)
 sequelize.sync({ alter: true })

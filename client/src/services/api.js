@@ -98,6 +98,21 @@ const api = {
     const response = await axios.delete(`${EXAM_PREP_BASE}/${id}`);
     return response.data;
   },
+
+  askExamAiQuestion: async (examId, question) => {
+    const response = await axios.post(`${EXAM_PREP_BASE}/${examId}/ai-chat/ask`, { question });
+    return response.data;
+  },
+
+  getExamAiChatHistory: async (examId) => {
+    const response = await axios.get(`${EXAM_PREP_BASE}/${examId}/ai-chat/history`);
+    return response.data;
+  },
+
+  clearExamAiChatHistory: async (examId) => {
+    const response = await axios.delete(`${EXAM_PREP_BASE}/${examId}/ai-chat/history`);
+    return response.data;
+  },
   
   // Courses
   getCourses: async () => {
