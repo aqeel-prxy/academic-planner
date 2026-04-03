@@ -2,10 +2,12 @@ const Event = require('../models/Event');
 const { validationResult } = require('express-validator');
 const { Op } = require('sequelize');
 
-// GET all events
+// GET all events (optional ?timetableKey=default)
 const getAllEvents = async (req, res) => {
   try {
+    const timetableKey = req.query.timetableKey || 'default';
     const events = await Event.findAll({
+      where: { timetableKey },
       order: [['start', 'ASC']]
     });
     res.json(events);
@@ -41,8 +43,11 @@ const createEvent = async (req, res) => {
     // Check for conflicts
     const { start, end } = req.body;
     
+    const timetableKey = req.body.timetableKey || 'default';
+
     const conflictingEvent = await Event.findOne({
       where: {
+        timetableKey,
         [Op.or]: [
           {
             start: { [Op.between]: [start, end] }
@@ -64,7 +69,8 @@ const createEvent = async (req, res) => {
     const { id: bodyId, ...data } = req.body;
     const event = await Event.create({
       id: (bodyId && bodyId !== 'null') ? bodyId : Date.now().toString(),
-      ...data
+      ...data,
+      timetableKey: data.timetableKey || 'default'
     });
     res.status(201).json(event);
   } catch (error) {
@@ -81,28 +87,35 @@ const updateEvent = async (req, res) => {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    // Check for conflicts (excluding this event)
-    const { start, end } = req.body;
-    
-    const conflictingEvent = await Event.findOne({
-      where: {
-        id: { [Op.ne]: req.params.id },
-        [Op.or]: [
-          {
-            start: { [Op.between]: [start, end] }
-          },
-          {
-            end: { [Op.between]: [start, end] }
-          }
-        ]
-      }
-    });
+    const start = req.body.start !== undefined ? req.body.start : event.start;
+    const end = req.body.end !== undefined ? req.body.end : event.end;
 
-    if (conflictingEvent) {
-      return res.status(409).json({ 
-        error: 'Time slot conflict with existing event',
-        conflictingEvent 
+    const timetableKey = req.body.timetableKey !== undefined
+      ? req.body.timetableKey
+      : event.timetableKey;
+
+    if (start != null && end != null) {
+      const conflictingEvent = await Event.findOne({
+        where: {
+          id: { [Op.ne]: req.params.id },
+          timetableKey: timetableKey || 'default',
+          [Op.or]: [
+            {
+              start: { [Op.between]: [start, end] }
+            },
+            {
+              end: { [Op.between]: [start, end] }
+            }
+          ]
+        }
       });
+
+      if (conflictingEvent) {
+        return res.status(409).json({
+          error: 'Time slot conflict with existing event',
+          conflictingEvent
+        });
+      }
     }
 
     await event.update(req.body);

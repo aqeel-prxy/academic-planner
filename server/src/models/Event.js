@@ -30,6 +30,11 @@ const Event = sequelize.define('Event', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  timetableKey: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'default'
+  },
   location: {
     type: DataTypes.STRING
   }

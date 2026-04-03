@@ -62,13 +62,7 @@ const allowedPriorities = ['High', 'Medium', 'Low'];
 const validateAssignment = [
   body('title').trim().notEmpty().withMessage('Assignment title is required'),
   body('course').trim().notEmpty().withMessage('Course is required'),
-  body('dueDate').isISO8601().withMessage('A valid due date is required')
-    .custom((value) => {
-      if (new Date(value) <= new Date()) {
-        throw new Error('Due date must be in the future');
-      }
-      return true;
-    }),
+  body('dueDate').isISO8601().withMessage('A valid due date is required'),
   body('weighting').isFloat({ min: 0, max: 100 }).withMessage('Weighting must be between 0 and 100'),
   body('description').optional().isString(),
   body('priority').isIn(allowedPriorities).withMessage('Priority must be High, Medium, or Low'),
@@ -81,13 +75,7 @@ const validateAssignment = [
 const validateAssignmentUpdate = [
   body('title').optional().trim().notEmpty().withMessage('Assignment title cannot be empty'),
   body('course').optional().trim().notEmpty().withMessage('Course cannot be empty'),
-  body('dueDate').optional().isISO8601().withMessage('A valid due date is required')
-    .custom((value) => {
-      if (new Date(value) <= new Date()) {
-        throw new Error('Due date must be in the future');
-      }
-      return true;
-    }),
+  body('dueDate').optional().isISO8601().withMessage('A valid due date is required'),
   body('weighting').optional().isFloat({ min: 0, max: 100 }).withMessage('Weighting must be between 0 and 100'),
   body('description').optional().isString(),
   body('priority').optional().isIn(allowedPriorities).withMessage('Priority must be High, Medium, or Low'),

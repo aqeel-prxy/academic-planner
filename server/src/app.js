@@ -28,6 +28,7 @@ const Module = require('./models/Module');
 const Grade = require('./models/Grade');
 const ModuleResource = require('./models/ModuleResource');
 require('./models/Assignment');
+require('./models/Attendance');
 
 Module.hasMany(ModuleResource, { foreignKey: 'moduleId', onDelete: 'CASCADE', hooks: true });
 ModuleResource.belongsTo(Module, { foreignKey: 'moduleId' });
@@ -50,20 +51,24 @@ syncDatabase();
 
 console.log('🔄 Loading routes...');
 try {
+  const timetableRoutes = require('./routes/timetableRoutes');
   const eventRoutes = require('./routes/eventRoutes');
   const examPreparationRoutes = require('./routes/examPreparationRoutes');
   const moduleRoutes = require('./routes/moduleRoutes');
   const gradeRoutes = require('./routes/gradeRoutes');
   const moduleResourceRoutes = require('./routes/moduleResourceRoutes');
   const assignmentRoutes = require('./routes/assignmentRoutes');
+  const attendanceRoutes = require('./routes/attendanceRoutes');
   console.log('✅ Routes files loaded successfully');
 
+  app.use('/api/timetables', timetableRoutes);
   app.use('/api/events', eventRoutes);
   app.use('/api/exam-preparation', examPreparationRoutes);
   app.use('/api/modules', moduleRoutes);
   app.use('/api/grades', gradeRoutes);
   app.use('/api/module-resources', moduleResourceRoutes);
   app.use('/api/assignments', assignmentRoutes);
+  app.use('/api/attendance', attendanceRoutes);
   console.log('✅ All routes mounted successfully');
 } catch (error) {
   console.error('❌ Failed to load routes:', error.message);
@@ -82,12 +87,14 @@ app.get('/api/test', (req, res) => {
   res.json({
     message: '✅ API test endpoint working',
     routes: {
+      timetables: '/api/timetables',
       events: '/api/events',
       examPreparation: '/api/exam-preparation',
       modules: '/api/modules',
       grades: '/api/grades',
       moduleResources: '/api/module-resources',
       assignments: '/api/assignments',
+      attendance: '/api/attendance',
       test: '/api/test',
       uploads: '/uploads'
     }
@@ -101,12 +108,14 @@ app.use((req, res) => {
     availableRoutes: [
       '/',
       '/api/test',
+      '/api/timetables',
       '/api/events',
       '/api/exam-preparation',
       '/api/modules',
       '/api/grades',
       '/api/module-resources',
-      '/api/assignments'
+      '/api/assignments',
+      '/api/attendance'
     ]
   });
 });
@@ -130,12 +139,14 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`\n🚀 Server running on http://localhost:${PORT}`);
   console.log(`📝 Test endpoint: http://localhost:${PORT}/api/test`);
+  console.log(`📆 Timetables: http://localhost:${PORT}/api/timetables`);
   console.log(`📅 Events: http://localhost:${PORT}/api/events`);
   console.log(`📚 Exam preparation: http://localhost:${PORT}/api/exam-preparation`);
   console.log(`📘 Modules: http://localhost:${PORT}/api/modules`);
   console.log(`📊 Grades: http://localhost:${PORT}/api/grades`);
   console.log(`📁 Module resources: http://localhost:${PORT}/api/module-resources`);
   console.log(`📋 Assignments: http://localhost:${PORT}/api/assignments`);
+  console.log(`✅ Attendance: http://localhost:${PORT}/api/attendance`);
   console.log(`💾 Database: SQLite (database.sqlite)`);
 });
 
