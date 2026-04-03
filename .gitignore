@@ -31,3 +31,6 @@ server/database.sqlite
 server/database.sqlite-journal
 server/database.sqlite-shm
 server/database.sqlite-wal
+
+# User uploads (exam PDFs, etc.)
+server/uploads/

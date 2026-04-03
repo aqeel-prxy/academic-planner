@@ -2,6 +2,32 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+const EXAM_PREP_BASE = `${API_URL}/exam-preparation`;
+
+const toExamFormData = (payload) => {
+  const formData = new FormData();
+  const {
+    lecturePdfFiles = [],
+    lecturePdfs = [],
+    ...rest
+  } = payload || {};
+
+  Object.entries(rest).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      formData.append(key, '');
+      return;
+    }
+    formData.append(key, String(value));
+  });
+
+  formData.append('lecturePdfs', JSON.stringify(lecturePdfs));
+  lecturePdfFiles.forEach((file) => {
+    formData.append('lecturePdfs', file);
+  });
+
+  return formData;
+};
+
 const api = {
   // Events (optional timetableKey for split-student timetables)
   getEvents: async (timetableKey = 'default') => {
@@ -19,17 +45,66 @@ const api = {
     const response = await axios.get(`${API_URL}/timetables`);
     return response.data;
   },
-  
+
   updateEvent: async (id, event) => {
     const response = await axios.put(`${API_URL}/events/${id}`, event);
     return response.data;
   },
-  
+
   deleteEvent: async (id) => {
     const response = await axios.delete(`${API_URL}/events/${id}`);
     return response.data;
   },
-  
+
+  // Exam Preparation
+  getExamPreparations: async () => {
+    const response = await axios.get(EXAM_PREP_BASE);
+    return response.data?.data ?? response.data;
+  },
+
+  getUpcomingExams: async () => {
+    const response = await axios.get(`${EXAM_PREP_BASE}/upcoming`);
+    return response.data?.data ?? response.data;
+  },
+
+  getExamPreparationById: async (id) => {
+    const response = await axios.get(`${EXAM_PREP_BASE}/${id}`);
+    return response.data?.data ?? response.data;
+  },
+
+  createExamPreparation: async (payload) => {
+    const response = await axios.post(EXAM_PREP_BASE, toExamFormData(payload), {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  },
+
+  updateExamPreparation: async (id, payload) => {
+    const response = await axios.put(`${EXAM_PREP_BASE}/${id}`, toExamFormData(payload), {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  },
+
+  updateExamPdfStatus: async (examId, pdfId, completed) => {
+    const response = await axios.patch(`${EXAM_PREP_BASE}/${examId}/pdfs/${pdfId}`, { completed });
+    return response.data;
+  },
+
+  deleteExamPdf: async (examId, pdfId) => {
+    const response = await axios.delete(`${EXAM_PREP_BASE}/${examId}/pdfs/${pdfId}`);
+    return response.data;
+  },
+
+  deleteExamPreparation: async (id) => {
+    const response = await axios.delete(`${EXAM_PREP_BASE}/${id}`);
+    return response.data;
+  },
+
   // Courses for current timetable only (no past subjects in new timetable)
   getCourses: async (timetableKey = 'default') => {
     const response = await axios.get(`${API_URL}/timetables/${encodeURIComponent(timetableKey)}/courses`);
@@ -51,28 +126,6 @@ const api = {
   },
   deleteAttendance: async (id) => {
     await axios.delete(`${API_URL}/attendance/${id}`);
-  },
-
-  // Exam preparation
-  getExamPreparations: async () => {
-    const response = await axios.get(`${API_URL}/exam-preparation`);
-    return response.data;
-  },
-  getExamPreparationById: async (id) => {
-    const response = await axios.get(`${API_URL}/exam-preparation/${id}`);
-    return response.data?.data || response.data;
-  },
-  createExamPreparation: async (payload) => {
-    const response = await axios.post(`${API_URL}/exam-preparation`, payload);
-    return response.data?.data || response.data;
-  },
-  updateExamPreparation: async (id, payload) => {
-    const response = await axios.put(`${API_URL}/exam-preparation/${id}`, payload);
-    return response.data?.data || response.data;
-  },
-  deleteExamPreparation: async (id) => {
-    const response = await axios.delete(`${API_URL}/exam-preparation/${id}`);
-    return response.data;
   }
 };
 
