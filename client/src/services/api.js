@@ -40,7 +40,6 @@ const api = {
     return response.data;
   },
 
-  // Timetable versions (e.g. My Week, Weekend 5.1, 5.2)
   getTimetables: async () => {
     const response = await axios.get(`${API_URL}/timetables`);
     return response.data;
@@ -56,7 +55,7 @@ const api = {
     return response.data;
   },
 
-  // Exam Preparation
+  // Exam preparation
   getExamPreparations: async () => {
     const response = await axios.get(EXAM_PREP_BASE);
     return response.data?.data ?? response.data;
@@ -105,8 +104,91 @@ const api = {
     return response.data;
   },
 
-  // Courses for current timetable only (no past subjects in new timetable)
-  getCourses: async (timetableKey = 'default') => {
+  // Modules (GPA / organizer)
+  getModules: async () => {
+    const response = await axios.get(`${API_URL}/modules`);
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.value || data);
+  },
+
+  getModulesBySemester: async (semester, year) => {
+    const response = await axios.get(`${API_URL}/modules/semester`, {
+      params: { semester, year }
+    });
+    return response.data;
+  },
+
+  getModuleById: async (id) => {
+    const response = await axios.get(`${API_URL}/modules/${id}`);
+    return response.data;
+  },
+
+  createModule: async (module) => {
+    const response = await axios.post(`${API_URL}/modules`, module);
+    return response.data;
+  },
+
+  updateModule: async (id, module) => {
+    const response = await axios.put(`${API_URL}/modules/${id}`, module);
+    return response.data;
+  },
+
+  deleteModule: async (id) => {
+    const response = await axios.delete(`${API_URL}/modules/${id}`);
+    return response.data;
+  },
+
+  getGrades: async () => {
+    const response = await axios.get(`${API_URL}/grades`);
+    return response.data;
+  },
+
+  getGradesByModule: async (moduleId) => {
+    const response = await axios.get(`${API_URL}/grades/module/${moduleId}`);
+    return response.data;
+  },
+
+  getGradesBySemester: async (semester) => {
+    const response = await axios.get(`${API_URL}/grades/semester/${semester}`);
+    return response.data;
+  },
+
+  createGrade: async (grade) => {
+    const response = await axios.post(`${API_URL}/grades`, grade);
+    return response.data;
+  },
+
+  updateGrade: async (id, grade) => {
+    const response = await axios.put(`${API_URL}/grades/${id}`, grade);
+    return response.data;
+  },
+
+  deleteGrade: async (id) => {
+    const response = await axios.delete(`${API_URL}/grades/${id}`);
+    return response.data;
+  },
+
+  getGPAStatistics: async (semester) => {
+    const response = await axios.get(`${API_URL}/grades/stats/gpa`, {
+      params: { semester }
+    });
+    return response.data;
+  },
+
+  getGPATrend: async () => {
+    const response = await axios.get(`${API_URL}/grades/stats/trend`);
+    return response.data;
+  },
+
+  getRiskAnalysis: async (semester) => {
+    const response = await axios.get(`${API_URL}/grades/stats/risk`, {
+      params: { semester }
+    });
+    return response.data;
+  },
+
+  // Timetable-linked courses (per timetable version)
+  getTimetableCourses: async (timetableKey = 'default') => {
     const response = await axios.get(`${API_URL}/timetables/${encodeURIComponent(timetableKey)}/courses`);
     return response.data;
   },
@@ -126,7 +208,43 @@ const api = {
   },
   deleteAttendance: async (id) => {
     await axios.delete(`${API_URL}/attendance/${id}`);
-  }
+  },
+
+  // Module organizer (lectures, labs, tutorials, notes)
+  getModuleResources: async (moduleId) => {
+    const response = await axios.get(`${API_URL}/module-resources`, {
+      params: { moduleId }
+    });
+    return response.data;
+  },
+
+  createModuleResource: async (payload) => {
+    const response = await axios.post(`${API_URL}/module-resources`, payload);
+    return response.data;
+  },
+
+  // multipart/form-data; field name for file: `document`
+  createModuleResourceForm: async (formData) => {
+    const response = await axios.post(`${API_URL}/module-resources`, formData);
+    return response.data;
+  },
+
+  updateModuleResource: async (id, payload) => {
+    const response = await axios.put(`${API_URL}/module-resources/${id}`, payload);
+    return response.data;
+  },
+
+  updateModuleResourceForm: async (id, formData) => {
+    const response = await axios.put(`${API_URL}/module-resources/${id}`, formData);
+    return response.data;
+  },
+
+  deleteModuleResource: async (id) => {
+    const response = await axios.delete(`${API_URL}/module-resources/${id}`);
+    return response.data;
+  },
+
+  getModuleResourceDownloadUrl: (id) => `${API_URL}/module-resources/${id}/download`
 };
 
 export default api;

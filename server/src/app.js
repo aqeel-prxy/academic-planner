@@ -24,33 +24,49 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Import model
+// Import models
 const Event = require('./models/Event');
 const ExamPreparation = require('./models/ExamPreparationModel');
+const Module = require('./models/Module');
+const Grade = require('./models/Grade');
+const ModuleResource = require('./models/ModuleResource');
 
-// Sync database (creates tables if they don't exist)
-sequelize.sync({ alter: true })
-  .then(() => console.log('✅ Database synced'))
-  .catch(err => console.error('❌ Database sync failed:', err));
+Module.hasMany(ModuleResource, { foreignKey: 'moduleId', onDelete: 'CASCADE', hooks: true });
+ModuleResource.belongsTo(Module, { foreignKey: 'moduleId' });
 
-// Debug - check if routes file exists and loads properly
+// Sync database (creates / alters tables). ModuleResources is synced separately so it still
+// gets created if a global alter fails (common on SQLite with FK constraints).
+async function syncDatabase() {
+  try {
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database synced');
+  } catch (err) {
+    console.error('❌ Database sync failed:', err.message);
+  }
+  try {
+    await ModuleResource.sync({ alter: true });
+    console.log('✅ Module organizer table (ModuleResources) ready');
+  } catch (err) {
+    console.error('❌ ModuleResources sync failed:', err.message);
+  }
+}
+syncDatabase();
+
 console.log('🔄 Loading routes...');
 try {
   const eventRoutes = require('./routes/eventRoutes');
-  console.log('✅ Routes file loaded successfully');
-  console.log('📋 Routes object type:', typeof eventRoutes);
-  console.log('📋 Is router function:', typeof eventRoutes === 'function');
-  
-  // Use the routes
-  app.use('/api/events', eventRoutes);
-  console.log('✅ Routes mounted at /api/events');
-
   const examPreparationRoutes = require('./routes/examPreparationRoutes');
-  console.log('✅ Exam preparation routes loaded successfully');
-  app.use('/api/exam-preparation', examPreparationRoutes);
-  console.log('✅ Exam preparation routes mounted at /api/exam-preparation');
+  const moduleRoutes = require('./routes/moduleRoutes');
+  const gradeRoutes = require('./routes/gradeRoutes');
+  const moduleResourceRoutes = require('./routes/moduleResourceRoutes');
+  console.log('✅ Routes files loaded successfully');
 
-  
+  app.use('/api/events', eventRoutes);
+  app.use('/api/exam-preparation', examPreparationRoutes);
+  app.use('/api/modules', moduleRoutes);
+  app.use('/api/grades', gradeRoutes);
+  app.use('/api/module-resources', moduleResourceRoutes);
+  console.log('✅ All routes mounted successfully');
 } catch (error) {
   console.error('❌ Failed to load routes:', error.message);
   console.error('❌ Stack trace:', error.stack);
@@ -58,7 +74,7 @@ try {
 
 // Root route
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: '🎓 Academic Planner API is running',
     status: 'healthy',
     timestamp: new Date().toISOString()
@@ -67,33 +83,43 @@ app.get('/', (req, res) => {
 
 // Test route to verify server is working
 app.get('/api/test', (req, res) => {
-  res.json({ 
+  res.json({
     message: '✅ API test endpoint working',
     routes: {
       events: '/api/events',
-      test: '/api/test',
       examPreparation: '/api/exam-preparation',
-      uploads: '/uploads/exam-pdfs/:file'
-
+      modules: '/api/modules',
+      grades: '/api/grades',
+      moduleResources: '/api/module-resources',
+      test: '/api/test',
+      uploads: '/uploads'
     }
   });
 });
 
 // 404 handler for unmatched routes
 app.use((req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Route not found',
     message: `Cannot ${req.method} ${req.url}`,
-    availableRoutes: ['/', '/api/test', '/api/events', '/api/exam-preparation', '/uploads/exam-pdfs/:file']
+    availableRoutes: [
+      '/',
+      '/api/test',
+      '/api/events',
+      '/api/exam-preparation',
+      '/api/modules',
+      '/api/grades',
+      '/api/module-resources'
+    ]
   });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
   console.error('❌ Server error:', err);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Internal server error',
-    message: err.message 
+    message: err.message
   });
 });
 
@@ -102,7 +128,10 @@ app.listen(PORT, () => {
   console.log(`\n🚀 Server running on http://localhost:${PORT}`);
   console.log(`📝 Test endpoint: http://localhost:${PORT}/api/test`);
   console.log(`📅 Events endpoint: http://localhost:${PORT}/api/events`);
-  console.log(`📚 Exam Preparation endpoint: http://localhost:${PORT}/api/exam-preparation`);
+  console.log(`📚 Exam preparation: http://localhost:${PORT}/api/exam-preparation`);
+  console.log(`📘 Modules endpoint: http://localhost:${PORT}/api/modules`);
+  console.log(`📊 Grades endpoint: http://localhost:${PORT}/api/grades`);
+  console.log(`📁 Module resources: http://localhost:${PORT}/api/module-resources`);
   console.log(`💾 Database: SQLite (database.sqlite)`);
 });
 

@@ -156,6 +156,24 @@ const Navbar = () => {
           </NavLink>
 
           <NavLink
+            to="/grades"
+            className={({ isActive }) =>
+              `nav-link ${isActive ? 'active' : ''}`
+            }
+          >
+            GPA Tracker
+          </NavLink>
+
+          <NavLink
+            to="/module-organizer"
+            className={({ isActive }) =>
+              `nav-link ${isActive ? 'active' : ''}`
+            }
+          >
+            Module Organizer
+          </NavLink>
+
+          <NavLink
             to="/timetable"
             className={({ isActive }) =>
               `nav-link ${isActive ? 'active' : ''}`

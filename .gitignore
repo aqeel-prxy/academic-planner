@@ -1,5 +1,7 @@
 # Root dependencies and build output
 node_modules/
+client/node_modules/
+server/node_modules/
 dist/
 build/
 coverage/
@@ -22,6 +24,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Never commit git metadata archives (too large for GitHub)
+.git.zip
+
 # Local database files
 *.sqlite
 *.sqlite-journal
@@ -32,5 +37,5 @@ server/database.sqlite-journal
 server/database.sqlite-shm
 server/database.sqlite-wal
 
-# User uploads (exam PDFs, etc.)
+# User uploads (exam PDFs, module resources, etc.)
 server/uploads/
