@@ -40,5 +40,11 @@ server/database.sqlite-journal
 server/database.sqlite-shm
 server/database.sqlite-wal
 
+<<<<<<< HEAD
+
+.env
+.env.*
+=======
 # User uploads (exam PDFs, module resources, etc.)
 server/uploads/
+>>>>>>> origin/main

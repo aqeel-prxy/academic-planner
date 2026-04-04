@@ -96,8 +96,63 @@ const TimetableCalendar = () => {
   useEffect(() => {
     const loadEvents = async () => {
       try {
+<<<<<<< HEAD
+        const [classEventsRes, examsRes] = await Promise.all([
+          api.getEvents(currentTimetableKey),
+          api.getExamPreparations()
+        ]);
+
+        const classEvents = (Array.isArray(classEventsRes) ? classEventsRes : []).map(toCalendarEvent);
+
+        const examsRaw = Array.isArray(examsRes) ? examsRes : [];
+
+        const examEvents = examsRaw
+          .filter((x) => x && x.examDate)
+          .map((x) => {
+            const startTime = x.startTime || '09:00';
+            const endTime = x.endTime || '10:00';
+            const start = new Date(`${x.examDate}T${startTime}`);
+            const end = new Date(`${x.examDate}T${endTime}`);
+            return {
+              id: `exam-${x.id}`,
+              title: `EXAM • ${x.subject || ''}${x.subject && x.examTitle ? ' • ' : ''}${x.examTitle || ''}`.trim(),
+              start,
+              end,
+              backgroundColor: '#dc2626',
+              borderColor: '#b91c1c',
+              editable: false,
+              extendedProps: {
+                isExam: true,
+                examData: x,
+                courseCode: x.subject || 'EXAM',
+                location: x.venue || ''
+              }
+            };
+          });
+
+        setEvents([...classEvents, ...examEvents]);
+
+        const params = new URLSearchParams(location.search);
+        const focusExamId = params.get('focusExam');
+        if (focusExamId) {
+          try {
+            const fetched = await api.getExamPreparationById(focusExamId);
+            const target = fetched && fetched.examDate ? fetched : examsRaw.find((x) => String(x.id) === String(focusExamId));
+            if (target?.examDate) {
+              const startTime = target.startTime || '09:00';
+              const focusDate = new Date(`${target.examDate}T${startTime}`);
+              setInitialDate(focusDate);
+              setSelectedExam(target);
+              setShowExamModal(true);
+            }
+          } catch {
+            // ignore; fallback is not opening modal
+          }
+        }
+=======
         const data = await api.getEvents(currentTimetableKey);
         setEvents(data.map(toCalendarEvent));
+>>>>>>> origin/main
       } catch (error) {
         console.error('Failed to load events:', error);
       }

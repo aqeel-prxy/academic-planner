@@ -12,6 +12,11 @@ const {
   toggleExamPdfCompleted,
   deleteExamPdf,
 } = require("../controller/examPreparationController");
+const {
+  askQuestion,
+  getHistory,
+  clearHistory,
+} = require("../controller/examAiChatController");
 
 // Create
 router.post("/", uploadExamPdfs.array("lecturePdfs", 10), createExamPreparation);
@@ -21,6 +26,11 @@ router.get("/", getAllExamPreparations);
 
 // Get upcoming exams
 router.get("/upcoming", getUpcomingExams);
+
+// AI chat endpoints
+router.post("/:examId/ai-chat/ask", askQuestion);
+router.get("/:examId/ai-chat/history", getHistory);
+router.delete("/:examId/ai-chat/history", clearHistory);
 
 // Get one by ID
 router.get("/:id", getExamPreparationById);

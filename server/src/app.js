@@ -24,11 +24,15 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 const Event = require('./models/Event');
 const ExamPreparation = require('./models/ExamPreparationModel');
+<<<<<<< HEAD
+const ExamAiChatSession = require('./models/ExamAiChatSession');
+=======
 const Module = require('./models/Module');
 const Grade = require('./models/Grade');
 const ModuleResource = require('./models/ModuleResource');
 require('./models/Assignment');
 require('./models/Attendance');
+>>>>>>> origin/main
 
 Module.hasMany(ModuleResource, { foreignKey: 'moduleId', onDelete: 'CASCADE', hooks: true });
 ModuleResource.belongsTo(Module, { foreignKey: 'moduleId' });
@@ -96,7 +100,13 @@ app.get('/api/test', (req, res) => {
       assignments: '/api/assignments',
       attendance: '/api/attendance',
       test: '/api/test',
+<<<<<<< HEAD
+      examPreparation: '/api/exam-preparation',
+      uploads: '/uploads/exam-pdfs/:file'
+
+=======
       uploads: '/uploads'
+>>>>>>> origin/main
     }
   });
 });
@@ -105,6 +115,9 @@ app.use((req, res) => {
   res.status(404).json({
     error: 'Route not found',
     message: `Cannot ${req.method} ${req.url}`,
+<<<<<<< HEAD
+    availableRoutes: ['/', '/api/test', '/api/events', '/api/exam-preparation', '/uploads/exam-pdfs/:file']
+=======
     availableRoutes: [
       '/',
       '/api/test',
@@ -117,6 +130,7 @@ app.use((req, res) => {
       '/api/assignments',
       '/api/attendance'
     ]
+>>>>>>> origin/main
   });
 });
 
