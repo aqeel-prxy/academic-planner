@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Navbar.css';
@@ -32,12 +32,11 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [readIds, setReadIds] = useState(getReadAlertIds);
-  const [attendanceRisk, setAttendanceRisk] = useState(null);
 
   const loadAlerts = async () => {
     try {
       const res = await api.getExamPreparations();
-      const list = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
+      const list = Array.isArray(res) ? res : res && Array.isArray(res.data) ? res.data : [];
 
       const now = new Date();
       const upcoming = list
@@ -61,44 +60,6 @@ const Navbar = () => {
     return () => window.clearInterval(id);
   }, []);
 
-  const computeRisk = useCallback((rows) => {
-    const toInt = (v) => {
-      const n = Number(v);
-      if (!Number.isFinite(n)) return 0;
-      return Math.max(0, Math.floor(n));
-    };
-    const riskLevel = (r) => {
-      const req = toInt(r.requiredLectures);
-      const att = toInt(r.attendedLectures);
-      if (req <= 0) return 'unknown';
-      const ratio = att / req;
-      if (ratio >= 1) return 'green';
-      if (ratio >= 0.75) return 'yellow';
-      return 'red';
-    };
-    const levels = (Array.isArray(rows) ? rows : []).map(riskLevel);
-    if (levels.length === 0) return null;
-    if (levels.includes('red')) return 'red';
-    if (levels.includes('yellow')) return 'yellow';
-    if (levels.includes('green')) return 'green';
-    return 'unknown';
-  }, []);
-
-  const loadAttendanceRisk = useCallback(async () => {
-    try {
-      const rows = await api.getAttendance('default');
-      setAttendanceRisk(computeRisk(rows));
-    } catch {
-      setAttendanceRisk(null);
-    }
-  }, [computeRisk]);
-
-  useEffect(() => {
-    loadAttendanceRisk();
-    const id = window.setInterval(loadAttendanceRisk, 60 * 1000);
-    return () => window.clearInterval(id);
-  }, [loadAttendanceRisk]);
-
   useEffect(() => {
     const onDocClick = (e) => {
       if (!open) return;
@@ -117,10 +78,10 @@ const Navbar = () => {
     return `${unreadCount} unread exam notification${unreadCount === 1 ? '' : 's'}`;
   }, [unreadCount]);
 
-  const goToExamInTimetable = (exam) => {
+  const goToExam = (exam) => {
     setOpen(false);
     if (!exam?.id) {
-      navigate('/timetable');
+      navigate('/exam-preparation');
       return;
     }
 
@@ -131,7 +92,7 @@ const Navbar = () => {
       setReadAlertIds(next);
     }
 
-    navigate(`/timetable?focusExam=${encodeURIComponent(exam.id)}`);
+    navigate(`/exam-preparation?edit=${encodeURIComponent(exam.id)}`);
   };
 
   return (
@@ -148,100 +109,99 @@ const Navbar = () => {
         <div className="navbar-links">
           <NavLink
             to="/assignments"
-            className={({ isActive }) =>
-              `nav-link ${isActive ? 'active' : ''}`
-            }
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             Academic Hub
           </NavLink>
 
           <NavLink
+            to="/grades"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            GPA Tracker
+          </NavLink>
+
+          <NavLink
+            to="/module-organizer"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            Module Organizer
+          </NavLink>
+
+          <NavLink
             to="/timetable"
-            className={({ isActive }) =>
-              `nav-link ${isActive ? 'active' : ''}`
-            }
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             Visual Timetable
           </NavLink>
 
           <NavLink
             to="/attendance-risk"
-            className={({ isActive }) =>
-              `nav-link ${isActive ? 'active' : ''}`
-            }
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
-            <span className="nav-attendance-wrap">
-              <span>Attendance Risk</span>
-              {attendanceRisk && (
-                <span
-                  className={`nav-risk-dot nav-risk-dot--${attendanceRisk}`}
-                  aria-label={`Attendance risk: ${attendanceRisk}`}
-                  title={`Attendance risk: ${attendanceRisk}`}
-                />
-              )}
-            </span>
+            Attendance Risk
           </NavLink>
 
-          <NavLink
-            to="/exam-preparation"
-            className={({ isActive }) =>
-              `nav-link ${isActive ? 'active' : ''}`
-            }
-          >
-            <span className="nav-exam-wrap" ref={dropdownRef}>
-              <span>Exam Preparation</span>
-              <button
-                type="button"
-                className="nav-bell"
-                aria-label={alertLabel}
-                title={alertLabel}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setOpen((v) => !v);
-                }}
-              >
-                <span className="nav-bell-icon">🔔</span>
-                {unreadCount > 0 && <span className="nav-bell-badge">{unreadCount}</span>}
-              </button>
+          <div className="nav-exam-group" ref={dropdownRef}>
+            <NavLink
+              to="/exam-preparation"
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              Exam Preparation
+            </NavLink>
+            <button
+              type="button"
+              className="nav-bell"
+              aria-label={alertLabel}
+              title={alertLabel}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOpen((v) => !v);
+              }}
+            >
+              <span className="nav-bell-icon" aria-hidden>
+                🔔
+              </span>
+              {unreadCount > 0 && <span className="nav-bell-badge">{unreadCount}</span>}
+            </button>
 
-              {open && (
-                <div className="nav-bell-dropdown" role="menu">
-                  <div className="nav-bell-dropdown-title">Nearest Exams</div>
-                  {alerts.length === 0 ? (
-                    <div className="nav-bell-empty">No upcoming exams found.</div>
-                  ) : (
-                    <div className="nav-bell-list">
-                      {alerts.map(({ exam, start }) => {
-                        const isRead = readIds.includes(String(exam.id));
-                        const timeLabel = start ? start.toLocaleString() : exam.examDate;
-                        return (
+            {open && (
+              <div className="nav-bell-dropdown" role="menu">
+                <div className="nav-bell-dropdown-title">Upcoming exams</div>
+                {alerts.length === 0 ? (
+                  <div className="nav-bell-empty">No upcoming exams in the next sessions.</div>
+                ) : (
+                  <div className="nav-bell-list">
+                    {alerts.map(({ exam, start }) => {
+                      const isRead = readIds.includes(String(exam.id));
+                      const timeLabel = start ? start.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : exam.examDate;
+                      return (
                         <button
                           key={exam.id}
                           type="button"
                           className={`nav-bell-item ${isRead ? 'is-read' : ''}`}
-                          onClick={() => goToExamInTimetable(exam)}
+                          onClick={() => goToExam(exam)}
                         >
                           <div className="nav-bell-item-top">
-                            <span className="nav-bell-pill">EXAM</span>
+                            <span className="nav-bell-pill">Exam</span>
                             <span className="nav-bell-item-title">
-                              {exam.subject || 'Exam'}{exam.examTitle ? ` • ${exam.examTitle}` : ''}
+                              {exam.subject || 'Exam'}
+                              {exam.examTitle ? ` • ${exam.examTitle}` : ''}
                             </span>
                           </div>
                           <div className="nav-bell-item-sub">
-                            {timeLabel}{exam.venue ? ` • ${exam.venue}` : ''}
+                            {timeLabel}
+                            {exam.venue ? ` • ${exam.venue}` : ''}
                           </div>
                         </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </span>
-          </NavLink>
-
-
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

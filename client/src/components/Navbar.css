@@ -51,25 +51,26 @@
   transform: rotate(10deg) scale(1.1);
 }
 
+.navbar-brand-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
 .navbar-logo-text {
   background: linear-gradient(90deg, #3b82f6, #6366f1);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.navbar-brand-stack {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.03rem;
-  line-height: 1;
-}
-
 .navbar-logo-sub {
-  color: rgba(226, 232, 240, 0.8);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.55);
 }
 
 /* === Links === */
@@ -79,35 +80,17 @@
   gap: 1.2rem;
 }
 
-/* Exam notification bell */
-.nav-exam-wrap {
+/* Exam prep + notification bell (matches notification-system branch pattern) */
+.nav-exam-group {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.45rem;
   position: relative;
 }
 
-/* Attendance risk dot */
-.nav-attendance-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  position: relative;
+.nav-exam-group .nav-link {
+  padding-right: 0.15rem;
 }
-
-.nav-risk-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  display: inline-block;
-  border: 2px solid rgba(15, 23, 42, 0.85);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.10);
-}
-
-.nav-risk-dot--green { background: #10b981; }
-.nav-risk-dot--yellow { background: #f59e0b; }
-.nav-risk-dot--red { background: #dc2626; }
-.nav-risk-dot--unknown { background: #64748b; }
 
 .nav-bell {
   position: relative;
@@ -121,10 +104,11 @@
   background: rgba(255, 255, 255, 0.06);
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .nav-bell:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .nav-bell-icon {
@@ -154,8 +138,8 @@
   position: absolute;
   right: 0;
   top: calc(100% + 10px);
-  width: 320px;
-  background: rgba(15, 23, 42, 0.95);
+  width: min(320px, calc(100vw - 2rem));
+  background: rgba(15, 23, 42, 0.97);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
@@ -211,9 +195,9 @@
   justify-content: center;
   padding: 0.18rem 0.45rem;
   border-radius: 999px;
-  background: rgba(220, 38, 38, 0.18);
-  border: 1px solid rgba(220, 38, 38, 0.35);
-  color: #fecaca;
+  background: rgba(30, 64, 175, 0.35);
+  border: 1px solid rgba(147, 197, 253, 0.45);
+  color: #dbeafe;
   font-weight: 900;
   font-size: 0.75rem;
   white-space: nowrap;
@@ -283,5 +267,13 @@
 
   .navbar-links {
     gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-bell-dropdown {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
