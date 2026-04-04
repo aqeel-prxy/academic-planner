@@ -2,16 +2,14 @@
   max-width: 1440px;
   margin: 0 auto;
   padding: 1rem 1.25rem 1.5rem;
-<<<<<<< HEAD
+
   min-height: calc(100vh - 64px);
-=======
-  min-height: calc(100vh - 56px);
->>>>>>> origin/main
+
   box-sizing: border-box;
   position: relative;
   color: #0f172a;
   font-family: "Segoe UI", "Segoe UI Variable Text", "Inter", sans-serif;
-<<<<<<< HEAD
+
 }
 
 .exam-prep-page::before {
@@ -24,8 +22,7 @@
     radial-gradient(circle at 85% 18%, rgba(14, 165, 233, 0.10), transparent 24%),
     linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.92));
   z-index: -1;
-=======
->>>>>>> origin/main
+
 }
 
 .exam-prep-header {
@@ -49,11 +46,9 @@
 
 .exam-header-kicker {
   margin: 0;
-<<<<<<< HEAD
+
   color: #2563eb;
-=======
-  color: #1e40af;
->>>>>>> origin/main
+
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -558,7 +553,6 @@
   color: #b42318;
 }
 
-<<<<<<< HEAD
 .exam-form label {
   color: #304b70;
   font-size: 0.84rem;
@@ -624,8 +618,7 @@
   min-width: 120px;
 }
 
-=======
->>>>>>> origin/main
+
 .exam-details-modal .modal-content {
   border: 0;
   overflow: hidden;

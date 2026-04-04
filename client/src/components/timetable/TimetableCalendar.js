@@ -3,7 +3,9 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { useNavigate } from 'react-router-dom';
 import EventModal from './EventModal';
+import ExamDetailsModal from './ExamDetailsModal';
 import api from '../../services/api';
 import './timetable.css';
 
@@ -38,9 +40,12 @@ const setStoredTimetableName = (key, name) => {
 };
 
 const TimetableCalendar = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showExamModal, setShowExamModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedExam, setSelectedExam] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [currentTimetableKey, setCurrentTimetableKey] = useState('default');
   const [timetableList, setTimetableList] = useState([]);
@@ -96,7 +101,7 @@ const TimetableCalendar = () => {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-<<<<<<< HEAD
+
         const [classEventsRes, examsRes] = await Promise.all([
           api.getEvents(currentTimetableKey),
           api.getExamPreparations()
@@ -132,27 +137,21 @@ const TimetableCalendar = () => {
 
         setEvents([...classEvents, ...examEvents]);
 
-        const params = new URLSearchParams(location.search);
+        const params = new URLSearchParams(window.location.search);
         const focusExamId = params.get('focusExam');
         if (focusExamId) {
           try {
             const fetched = await api.getExamPreparationById(focusExamId);
             const target = fetched && fetched.examDate ? fetched : examsRaw.find((x) => String(x.id) === String(focusExamId));
-            if (target?.examDate) {
-              const startTime = target.startTime || '09:00';
-              const focusDate = new Date(`${target.examDate}T${startTime}`);
-              setInitialDate(focusDate);
+            if (target) {
               setSelectedExam(target);
               setShowExamModal(true);
             }
           } catch {
-            // ignore; fallback is not opening modal
+            // ignore; timetable still loads without focus mode
           }
         }
-=======
-        const data = await api.getEvents(currentTimetableKey);
-        setEvents(data.map(toCalendarEvent));
->>>>>>> origin/main
+
       } catch (error) {
         console.error('Failed to load events:', error);
       }
@@ -210,9 +209,30 @@ const TimetableCalendar = () => {
   };
 
   const handleEventClick = (info) => {
+    if (info.event.extendedProps?.isExam) {
+      setSelectedSlot(null);
+      setSelectedEvent(null);
+      setSelectedExam(info.event.extendedProps?.examData || null);
+      setShowModal(false);
+      setShowExamModal(true);
+      return;
+    }
+
     setSelectedEvent(info.event);
     setSelectedSlot(null);
     setShowModal(true);
+  };
+
+  const handleCloseExamModal = () => {
+    setShowExamModal(false);
+    setSelectedExam(null);
+  };
+
+  const handleEditExamFromTimetable = (exam) => {
+    handleCloseExamModal();
+    if (exam?.id) {
+      navigate(`/exam-preparation?edit=${exam.id}`);
+    }
   };
 
   // ✅ Drag & Drop Update (Backend Integrated)
@@ -309,7 +329,7 @@ const TimetableCalendar = () => {
   };
 
   const handleRenameTimetable = () => {
-    const list = allTimetables();
+    const list = allTimetables;
     const current = list.find(t => t.key === currentTimetableKey);
     const currentName = current ? current.name : currentTimetableKey;
     const name = window.prompt('Rename this timetable:', currentName);
@@ -373,6 +393,13 @@ const TimetableCalendar = () => {
         onSave={handleSaveEvent}
         eventData={selectedEvent}
         selectedSlot={selectedSlot}
+      />
+
+      <ExamDetailsModal
+        show={showExamModal}
+        onHide={handleCloseExamModal}
+        exam={selectedExam}
+        onEdit={handleEditExamFromTimetable}
       />
     </>
   );

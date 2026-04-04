@@ -447,19 +447,14 @@ const ExamPreparation = () => {
 						</div>
 						<div className="exam-details-notes">{selectedExam?.notes || 'No notes added yet.'}</div>
 					</section>
-<<<<<<< HEAD
+
 
 					<ExamAiChatPanel exam={selectedExam} isOpen={isDetailsOpen} />
 				</Modal.Body>
 			</Modal>
 
 			<Modal show={isModalOpen} onHide={closeModal} size="xl" centered className="exam-form-modal">
-=======
-				</Modal.Body>
-			</Modal>
 
-			<Modal show={isModalOpen} onHide={closeModal} size="lg" centered className="exam-form-modal">
->>>>>>> origin/main
 				<div className="exam-form-modal-header">
 					<h2 className="exam-form-modal-title">{editingId ? 'Edit Exam' : 'Add Exam'}</h2>
 					<button type="button" className="exam-form-modal-close" onClick={closeModal} aria-label="Close">&times;</button>

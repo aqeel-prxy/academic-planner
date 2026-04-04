@@ -60,62 +60,6 @@ const removeStoredFile = (storedFileName) => {
   }
 };
 
-const uploadsBaseDir = path.join(__dirname, "../../uploads/exam-pdfs");
-
-const ensureArray = (value) => {
-  if (Array.isArray(value)) return value;
-  if (typeof value === "string") {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      return [];
-    }
-  }
-  return [];
-};
-
-const toNumberOrDefault = (value, fallback = 0) => {
-  const num = Number(value);
-  return Number.isFinite(num) ? num : fallback;
-};
-
-const toStringOrEmpty = (value) => (value == null ? "" : String(value));
-
-const makePdfUrl = (req, fileName) => `${req.protocol}://${req.get("host")}/uploads/exam-pdfs/${fileName}`;
-
-const buildUploadedPdfItems = (req) => {
-  const files = Array.isArray(req.files) ? req.files : [];
-  return files.map((file) => ({
-    id: file.filename,
-    fileName: file.originalname,
-    storedFileName: file.filename,
-    url: makePdfUrl(req, file.filename),
-    completed: false,
-  }));
-};
-
-const parseExistingPdfItems = (body) => {
-  const list = ensureArray(body.lecturePdfs);
-  return list
-    .filter((item) => item && item.storedFileName)
-    .map((item) => ({
-      id: toStringOrEmpty(item.id || item.storedFileName),
-      fileName: toStringOrEmpty(item.fileName || item.storedFileName),
-      storedFileName: toStringOrEmpty(item.storedFileName),
-      url: toStringOrEmpty(item.url),
-      completed: Boolean(item.completed),
-    }));
-};
-
-const removeStoredFile = (storedFileName) => {
-  if (!storedFileName) return;
-  const fullPath = path.join(uploadsBaseDir, storedFileName);
-  if (fs.existsSync(fullPath)) {
-    fs.unlinkSync(fullPath);
-  }
-};
-
 // Create new exam preparation
 const createExamPreparation = async (req, res) => {
   try {
@@ -299,11 +243,9 @@ const deleteExamPreparation = async (req, res) => {
     const pdfItems = ensureArray(exam.lecturePdfs);
     pdfItems.forEach((pdf) => removeStoredFile(pdf.storedFileName));
 
-<<<<<<< HEAD
     await deleteExamAiChatSession(id);
 
-=======
->>>>>>> origin/main
+
     await exam.destroy();
 
     return res.status(200).json({
