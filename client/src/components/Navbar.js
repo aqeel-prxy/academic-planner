@@ -111,7 +111,7 @@ const Navbar = () => {
             to="/assignments"
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
-            Academic Hub
+            Assignment Dashboard
           </NavLink>
 
           <NavLink
