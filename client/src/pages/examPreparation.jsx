@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import api from '../services/api';
+import ExamAiChatPanel from '../components/examPreparation/ExamAiChatPanel';
 import './ExamPreparationPage.css';
 
 const initialForm = {
@@ -446,15 +447,22 @@ const ExamPreparation = () => {
 						</div>
 						<div className="exam-details-notes">{selectedExam?.notes || 'No notes added yet.'}</div>
 					</section>
+
+
+					<ExamAiChatPanel exam={selectedExam} isOpen={isDetailsOpen} />
 				</Modal.Body>
 			</Modal>
 
-			<Modal show={isModalOpen} onHide={closeModal} size="lg" centered className="exam-form-modal">
+			<Modal show={isModalOpen} onHide={closeModal} size="xl" centered className="exam-form-modal">
+
 				<div className="exam-form-modal-header">
 					<h2 className="exam-form-modal-title">{editingId ? 'Edit Exam' : 'Add Exam'}</h2>
 					<button type="button" className="exam-form-modal-close" onClick={closeModal} aria-label="Close">&times;</button>
 				</div>
 				<Modal.Body className="exam-form-modal-body">
+					<div className="exam-form-helper">
+						<p>Fill the exam details, add lecture PDFs, and the timetable will use this record for reminders and AI study help.</p>
+					</div>
 					<form className="exam-form" onSubmit={onSubmit}>
 						<div className="row-2">
 							<label>

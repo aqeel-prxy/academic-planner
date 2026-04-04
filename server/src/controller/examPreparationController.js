@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { Op } = require("sequelize");
 const ExamPreparation = require("../models/ExamPreparationModel");
+const { deleteExamAiChatSession } = require("../services/aiExamChatService");
 
 const uploadsBaseDir = path.join(__dirname, "../../uploads/exam-pdfs");
 
@@ -241,6 +242,9 @@ const deleteExamPreparation = async (req, res) => {
 
     const pdfItems = ensureArray(exam.lecturePdfs);
     pdfItems.forEach((pdf) => removeStoredFile(pdf.storedFileName));
+
+    await deleteExamAiChatSession(id);
+
 
     await exam.destroy();
 
