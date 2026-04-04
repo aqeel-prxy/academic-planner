@@ -192,7 +192,7 @@ const AssignmentDashboard = () => {
     <div className="assignment-dashboard-page">
       <section className="assignment-hero">
         <div className="hero-copy">
-          <span className="hero-kicker">Assignment Management System</span>
+          <span className="hero-kicker">Academic planner</span>
           <h1>Keep deadlines visible and coursework under control.</h1>
           <p>
             Track every assignment in one workspace, break work into checklist items, and focus attention on what is urgent without losing sight of completed progress.

@@ -24,6 +24,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Accidental Cursor/VS Code user-data copies in repo (do not commit)
+user2/
+
 # Never commit git metadata archives (too large for GitHub)
 .git.zip
 

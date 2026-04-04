@@ -261,6 +261,7 @@ function ModuleOrganizer() {
     <div className="module-organizer">
       <aside className="organizer-sidebar" aria-label="Modules">
         <div className="organizer-sidebar-head">
+          <p className="organizer-kicker">Academic planner</p>
           <h2>Module Organizer</h2>
           <p className="organizer-tagline">
             Lectures, labs, tutorials, notes, links, and documents (PDF, Office, images) in one place.

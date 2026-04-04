@@ -209,6 +209,8 @@ function GradeTracker() {
       <div className="gpa-dashboard-hero">
         <div className="gpa-dashboard-hero-left">
           <div className="gpa-dashboard-kicker">
+            <span className="gpa-kicker-brand">Academic planner</span>
+            <span className="dot">•</span>
             <span>Semester {academicInfo.semester}</span>
             <span className="dot">•</span>
             <span>Week {academicInfo.week}</span>

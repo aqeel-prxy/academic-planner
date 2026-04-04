@@ -1,19 +1,24 @@
+/* Timetable-aligned (slate / blue) — no separate green theme */
 :root {
-  --assignment-bg: #eef4f2;
-  --assignment-surface: rgba(255, 255, 255, 0.88);
-  --assignment-ink: #17313a;
-  --assignment-muted: #617982;
-  --assignment-border: rgba(23, 49, 58, 0.09);
-  --assignment-shadow: 0 20px 55px rgba(31, 54, 61, 0.12);
-  --assignment-blue: #1e6b76;
-  --assignment-blue-dark: #0d4d57;
+  --assignment-bg: #f1f5f9;
+  --assignment-surface: rgba(255, 255, 255, 0.94);
+  --assignment-ink: #0f172a;
+  --assignment-muted: #64748b;
+  --assignment-border: rgba(30, 58, 95, 0.1);
+  --assignment-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 12px 40px -10px rgba(30, 58, 95, 0.12);
+  --assignment-blue: #1e40af;
+  --assignment-blue-dark: #1e3a8a;
 }
 
 .assignment-dashboard-page {
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 2rem 1rem 3rem;
+  padding: 1.25rem 1.25rem 2.5rem;
   color: var(--assignment-ink);
+  background: transparent;
+  box-sizing: border-box;
+  min-height: calc(100vh - 56px);
+  font-family: "Segoe UI", "Segoe UI Variable Text", "Inter", sans-serif;
 }
 
 .assignment-hero {
@@ -21,23 +26,24 @@
   grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.85fr);
   gap: 1.5rem;
   padding: 2rem;
-  border-radius: 28px;
+  border-radius: 18px;
   background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.72), transparent 36%),
-    linear-gradient(135deg, #d9ebe5 0%, #edf6ec 45%, #f6f0dd 100%);
+    radial-gradient(circle at 100% 0%, rgba(219, 234, 254, 0.65), transparent 42%),
+    linear-gradient(165deg, #ffffff 0%, #f8fafc 50%, #eff6ff 100%);
   box-shadow: var(--assignment-shadow);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  border: 1px solid #e2e8f0;
 }
 
 .hero-kicker {
   display: inline-flex;
   padding: 0.45rem 0.8rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.65);
-  color: var(--assignment-blue-dark);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  background: rgba(239, 246, 255, 0.95);
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -82,11 +88,11 @@
 .primary-cta,
 .assignment-dashboard-page .btn-primary {
   border: none;
-  border-radius: 16px;
-  background: linear-gradient(135deg, var(--assignment-blue) 0%, #3e8f95 100%);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #2563eb 0%, var(--assignment-blue) 100%);
   padding: 0.9rem 1.25rem;
   font-weight: 700;
-  box-shadow: 0 14px 30px rgba(30, 107, 118, 0.22);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.28);
 }
 
 .summary-grid {
@@ -171,7 +177,8 @@
   gap: 0.4rem;
   padding: 0.3rem;
   border-radius: 16px;
-  background: #e7efed;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
 }
 
 .view-toggle button {

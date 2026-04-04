@@ -1,31 +1,120 @@
 .visual-timetable-page {
-  max-width: 1600px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0.75rem 1.25rem 1rem;
-  min-height: calc(100vh - 64px);
+  padding: 1rem 1.25rem 1.5rem;
+  min-height: calc(100vh - 56px);
   box-sizing: border-box;
+  color: #0f172a;
+  font-family: "Segoe UI", "Segoe UI Variable Text", "Inter", sans-serif;
 }
 
 .timetable-page-header {
-  margin-bottom: 0.75rem;
-  padding: 0.6rem 1rem;
-  background: #f8fafc;
-  border-radius: 10px;
+  margin-bottom: 1.1rem;
+  padding: 1.15rem 1.25rem 1.2rem;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 18px;
   border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 14px 36px -12px rgba(30, 58, 95, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.timetable-page-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1e40af, #3b82f6, #60a5fa);
+  opacity: 0.95;
+}
+
+.timetable-page-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.timetable-page-kicker {
+  margin: 0 0 0.35rem;
+  color: #1e40af;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
 }
 
 .timetable-page-header h1 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1e3a5f;
-  margin: 0 0 0.15rem 0;
-  letter-spacing: -0.02em;
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.03em;
 }
 
-.timetable-page-header p {
-  margin: 0;
-  color: #64748b;
+.timetable-page-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #eff6ff, #dbeafe);
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
   font-size: 0.8rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.timetable-page-badge svg {
+  font-size: 1.1rem;
+}
+
+.timetable-page-lead {
+  margin: 0.85rem 0 0;
+  color: #64748b;
+  font-size: 0.94rem;
+  line-height: 1.5;
+  max-width: 72ch;
+}
+
+.timetable-quick-tips {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.65rem;
+}
+
+.timetable-quick-tips li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: #475569;
+}
+
+.timetable-quick-tips li strong {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.timetable-tip-icon {
+  flex-shrink: 0;
+  margin-top: 0.12rem;
+  color: #1e40af;
+  font-size: 1rem;
 }
 
 .timetable-wrapper {

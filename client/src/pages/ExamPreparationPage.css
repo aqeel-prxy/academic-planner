@@ -2,23 +2,11 @@
   max-width: 1440px;
   margin: 0 auto;
   padding: 1rem 1.25rem 1.5rem;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 56px);
   box-sizing: border-box;
   position: relative;
   color: #0f172a;
   font-family: "Segoe UI", "Segoe UI Variable Text", "Inter", sans-serif;
-}
-
-.exam-prep-page::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 15% 10%, rgba(37, 99, 235, 0.11), transparent 28%),
-    radial-gradient(circle at 85% 18%, rgba(14, 165, 233, 0.10), transparent 24%),
-    linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.92));
-  z-index: -1;
 }
 
 .exam-prep-header {
@@ -42,7 +30,7 @@
 
 .exam-header-kicker {
   margin: 0;
-  color: #2563eb;
+  color: #1e40af;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.12em;
